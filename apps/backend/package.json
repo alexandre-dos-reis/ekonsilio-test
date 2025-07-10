@@ -1,10 +1,13 @@
 {
-  "name": "backend",
+  "name": "@ek/backend",
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env --env-file=.env src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
+  },
+  "exports": {
+    "client-types": "./src/exports/client-types.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.15.0",

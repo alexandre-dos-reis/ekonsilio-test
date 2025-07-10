@@ -1,11 +1,12 @@
 import { sql } from "drizzle-orm";
 import {
   pgTable,
-  integer,
   boolean,
   uuid,
   timestamp,
   varchar,
+  text,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 const primaryKeyColumn = {
@@ -31,10 +32,27 @@ const timestampColumns = {
 //format: xx-XX | ex: fr-FR
 const localeType = varchar({ length: 5 });
 
+export const userRoleEnum = pgEnum("user_role", ["user", "genius"]);
+
+export const abstractUsers = pgTable("abstract_users", {
+  ...primaryKeyColumn,
+  ...timestampColumns,
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified")
+    .$defaultFn(() => false)
+    .notNull(),
+  image: text("image"),
+  role: userRoleEnum(),
+});
+
 export const users = pgTable("users", {
   ...primaryKeyColumn,
   ...timestampColumns,
   locale: localeType,
+  abstractUserId: uuid("abstract_user_id").references(() => abstractUsers.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export const genius = pgTable("genius", {
@@ -42,12 +60,54 @@ export const genius = pgTable("genius", {
   ...timestampColumns,
   locales: localeType.array().default(sql`ARRAY[]::text[]`),
   isOnline: boolean("is_online").notNull().default(false),
+  abstractUserId: uuid("abstract_user_id").references(() => abstractUsers.id, {
+    onDelete: "cascade",
+  }),
+});
+
+export const sessions = pgTable("sessions", {
+  ...primaryKeyColumn,
+  ...timestampColumns,
+  expiresAt: timestamp("expires_at").notNull(),
+  token: text("token").notNull().unique(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => abstractUsers.id, { onDelete: "cascade" }),
+});
+
+export const accounts = pgTable("accounts", {
+  ...primaryKeyColumn,
+  ...timestampColumns,
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => abstractUsers.id, { onDelete: "cascade" }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  password: text("password"),
+});
+
+export const verifications = pgTable("verifications", {
+  ...primaryKeyColumn,
+  ...timestampColumns,
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
 });
 
 export const conversations = pgTable("conversations", {
   ...primaryKeyColumn,
   ...timestampColumns,
-  user: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  user: uuid("user_id").references(() => abstractUsers.id, {
+    onDelete: "set null",
+  }),
   genius: uuid("genius_id").references(() => genius.id, {
     onDelete: "set null",
   }),

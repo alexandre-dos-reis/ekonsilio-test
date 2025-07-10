@@ -1,5 +1,5 @@
 {
-  "name": "ekonsilio-test",
+  "name": "@ek/core",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -10,12 +10,18 @@
     "dev": "bun --filter '*' dev",
     "db:generate": "bun drizzle-kit generate",
     "db:migrate": "bun drizzle-kit migrate",
-    "db:push": "bun drizzle-kit push"
+    "db:push": "bun drizzle-kit push",
+    "auth:generate": "bunx @better-auth/cli generate --config ./apps/backend/src/auth.ts"
   },
   "devDependencies": {
+    "@total-typescript/tsconfig": "^1.0.4",
     "dotenv": "^17.2.0",
     "drizzle-kit": "^0.31.4",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@better-auth/cli": "^1.2.12",
+    "better-auth": "^1.2.12"
   }
 }
