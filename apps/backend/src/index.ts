@@ -17,7 +17,13 @@ app.use(
   }),
 );
 
-app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/user/**", (c) => {
+  return auth("user").handler(c.req.raw);
+});
+
+app.on(["POST", "GET"], "/api/auth/genius/**", (c) => {
+  return auth("genius").handler(c.req.raw);
+});
 
 app.get("/", async (c) => {
   const result = await db.execute("select 1");
