@@ -2,27 +2,42 @@ import type { Auth } from "../../../backend/src/exports/client-types";
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
-  type SetStateAction,
-  type Dispatch,
   type PropsWithChildren,
 } from "react";
 
 type User = Auth["$Infer"]["Session"]["user"] | null;
 
-const UserContext = createContext<{
+export type UserContextType = {
   user: User;
-  setUser: Dispatch<SetStateAction<User>>;
-}>({
+  setUser: (user: User) => void;
+};
+
+const UserContext = createContext<UserContextType>({
   user: null,
   setUser: () => null,
 });
 
+const getInitialState = () => {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
-  const [localUser, setLocalUser] = useState<User>(null);
+  const [user, setUser] = useState<User>(getInitialState);
+
+  useEffect(() => {
+    localStorage.setItem("user", JSON.stringify(user));
+  }, [user]);
 
   return (
-    <UserContext value={{ user: localUser, setUser: setLocalUser }}>
+    <UserContext
+      value={{
+        user,
+        setUser,
+      }}
+    >
       {children}
     </UserContext>
   );

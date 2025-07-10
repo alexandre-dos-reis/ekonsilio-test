@@ -1,17 +1,25 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  Link,
+  Outlet,
+} from "@tanstack/react-router";
 import { Navbar } from "../components/Navbar";
 
 import { ToastContainer } from "react-toastify";
-import { UserContextProvider } from "@/contexts/user";
+import { type UserContextType } from "@/contexts/user";
 
-export const Route = createRootRoute({
+interface RouterContext {
+  auth: UserContextType;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
-    <UserContextProvider>
+    <>
       <Navbar />
       <div className="max-w-xl mx-auto">
         <Outlet />
       </div>
       <ToastContainer position="bottom-center" />
-    </UserContextProvider>
+    </>
   ),
 });
