@@ -1,18 +1,21 @@
 {
   "name": "ekonsilio-test",
-  "type": "module",
   "private": true,
-  "scripts": {
-    "dev": "bun --filter '*' dev"
-  },
+  "type": "module",
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "db:generate": "bun drizzle-kit generate",
+    "db:migrate": "bun drizzle-kit migrate",
+    "db:push": "bun drizzle-kit push"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "devDependencies": {
+    "dotenv": "^17.2.0",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
   }
 }

@@ -1,21 +1,37 @@
-import { Elysia, t } from "elysia";
-import { cors } from "@elysiajs/cors";
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { env } from "./env";
+import { db } from "./db";
 
-const app = new Elysia()
-  .use(cors())
-  .get("/", () => "Hello Elysia")
-  .ws("/chat", {
-    body: t.Object({ message: t.String() }),
-    response: t.Object({ message: t.String() }),
-    message: (ws, payload) => {
-      console.log(payload.message);
-      ws.send({ message: "pong" });
-    },
-  })
-  .listen(3000);
+const app = new Hono();
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+app.get("/", async (c) => {
+  const result = await db.execute("select 1");
+  console.log(result.rows);
+  return c.text("ok");
+});
+
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: env.PORT,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+  },
 );
 
-export type App = typeof app;
+// graceful shutdown
+process.on("SIGINT", () => {
+  server.close();
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  server.close((err) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    process.exit(0);
+  });
+});

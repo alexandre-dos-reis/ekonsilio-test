@@ -1,0 +1,16 @@
+volumes:
+  database:
+
+services:
+  database:
+    image: postgres:17-alpine
+    container_name: ekonsilio-db-postgres
+    restart: unless-stopped
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./.docker/volumes/database/data:/var/lib/postgresql/data
