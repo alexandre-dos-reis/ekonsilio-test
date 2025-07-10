@@ -10,13 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ek/style": "workspace:*",
     "@ek/backend": "workspace:*",
+    "@ek/style": "workspace:*",
     "@elysiajs/eden": "^1.3.2",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-router": "^1.125.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "@tanstack/router-plugin": "^1.125.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/react-toastify": "^4.1.0",
     "@vitejs/plugin-react-swc": "^3.10.2",
     "daisyui": "^5.0.46",
     "elysia": "^1.3.5",

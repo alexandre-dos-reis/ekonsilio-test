@@ -3,10 +3,14 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import { abstractUsers, accounts, sessions, verifications } from "./db/schema";
 
-export const auth = (role: "user" | "genius") =>
+export const auth = (args: {
+  trustedOrigin: string;
+  role: "user" | "genius";
+  basePath: string;
+}) =>
   betterAuth({
-    basePath: `/api/auth/${role}`,
-    trustedOrigins: ["http://localhost:5173"],
+    basePath: args.basePath,
+    trustedOrigins: [args.trustedOrigin],
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {
@@ -22,9 +26,7 @@ export const auth = (role: "user" | "genius") =>
     databaseHooks: {
       user: {
         create: {
-          before: async (user) => {
-            return { data: { ...user, role: role } };
-          },
+          before: async (user) => ({ data: { ...user, role: args.role } }),
         },
       },
     },
@@ -43,4 +45,4 @@ export const auth = (role: "user" | "genius") =>
     },
   });
 
-export type Auth = typeof auth;
+export type Auth = ReturnType<typeof auth>;
