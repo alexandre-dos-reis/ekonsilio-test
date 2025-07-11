@@ -39,7 +39,7 @@ export const ChatBubble = ({
         {content}
       </div>
       <time className="chat-footer text-xs opacity-50">
-        {isUser && "You - "}
+        {isUser && "You, "}
         {getRelativeTime(timestamp)}
       </time>
     </div>

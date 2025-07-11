@@ -110,19 +110,20 @@ const rpc = app
       return c.json(null);
     }
 
-    const [user] = conv.userId
-      ? await db
-          .select()
-          .from(abstractUsers)
-          .where(eq(abstractUsers.id, conv.userId || ""))
-      : [null];
-
-    const [geniusUser] = conv.geniusId
-      ? await db
-          .select()
-          .from(abstractUsers)
-          .where(eq(abstractUsers.id, conv.geniusId || ""))
-      : [null];
+    const [[user], [geniusUser]] = await Promise.all([
+      conv.userId
+        ? db
+            .select()
+            .from(abstractUsers)
+            .where(eq(abstractUsers.id, conv.userId))
+        : [null],
+      true
+        ? await db
+            .select()
+            .from(abstractUsers)
+            .where(eq(abstractUsers.id, "2a410152-a650-4c29-a16b-8dabd3dea49d"))
+        : [null],
+    ]);
 
     return c.json({
       ...conv,

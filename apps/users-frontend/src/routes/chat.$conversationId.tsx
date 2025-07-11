@@ -40,7 +40,7 @@ function getMessages(
   }));
 
   return [...userMessages, ...geniusMessages].sort(
-    (a, b) => b.timestamp - a.timestamp,
+    (a, b) => a.timestamp - b.timestamp,
   );
 }
 
