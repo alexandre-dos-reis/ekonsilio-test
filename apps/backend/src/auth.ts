@@ -2,8 +2,9 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import { abstractUsers, accounts, sessions, verifications } from "./db/schema";
+import { env } from "./env";
 
-export const auth = (args: {
+const authFn = (args: {
   trustedOrigin: string;
   role: "user" | "genius";
   basePath: string;
@@ -45,4 +46,18 @@ export const auth = (args: {
     },
   });
 
-export type Auth = ReturnType<typeof auth>;
+export const auth = authFn({
+  basePath: "/api/auth/user",
+  role: "user",
+  trustedOrigin: env.APP_USER_TRUSTED_ORIGIN,
+});
+
+export const userAuth = auth;
+
+export const geniusAuth = authFn({
+  basePath: "/api/auth/genius",
+  role: "genius",
+  trustedOrigin: env.APP_GENIUS_TRUSTED_ORIGIN,
+});
+
+export type Auth = ReturnType<typeof authFn>;

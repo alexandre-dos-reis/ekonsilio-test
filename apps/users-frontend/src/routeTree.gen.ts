@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChatConversationIdRouteImport } from './routes/chat.$conversationId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatConversationIdRoute = ChatConversationIdRouteImport.update({
+  id: '/chat/$conversationId',
+  path: '/chat/$conversationId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/chat/$conversationId': typeof ChatConversationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/chat/$conversationId': typeof ChatConversationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,20 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/chat/$conversationId': typeof ChatConversationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/signin' | '/signup'
+  fullPaths: '/' | '/about' | '/signin' | '/signup' | '/chat/$conversationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/signin' | '/signup'
-  id: '__root__' | '/' | '/about' | '/signin' | '/signup'
+  to: '/' | '/about' | '/signin' | '/signup' | '/chat/$conversationId'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/signin'
+    | '/signup'
+    | '/chat/$conversationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +82,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  ChatConversationIdRoute: typeof ChatConversationIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$conversationId': {
+      id: '/chat/$conversationId'
+      path: '/chat/$conversationId'
+      fullPath: '/chat/$conversationId'
+      preLoaderRoute: typeof ChatConversationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  ChatConversationIdRoute: ChatConversationIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

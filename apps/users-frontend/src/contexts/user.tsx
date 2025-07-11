@@ -1,4 +1,3 @@
-import type { Auth } from "../../../backend/src/exports/client-types";
 import {
   createContext,
   useContext,
@@ -6,8 +5,8 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-
-type User = Auth["$Infer"]["Session"]["user"] | null;
+import { authClient } from "@/utils/auth";
+import type { User } from "@/utils/types";
 
 export type UserContextType = {
   user: User;
@@ -19,17 +18,15 @@ const UserContext = createContext<UserContextType>({
   setUser: () => null,
 });
 
-const getInitialState = () => {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-};
-
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
-  const [user, setUser] = useState<User>(getInitialState);
+  const { data, isPending } = authClient.useSession();
+  const [user, setUser] = useState<User>(null);
 
   useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(user));
-  }, [user]);
+    if (isPending === false && data?.user) {
+      setUser(data.user);
+    }
+  }, [isPending, data?.user]);
 
   return (
     <UserContext

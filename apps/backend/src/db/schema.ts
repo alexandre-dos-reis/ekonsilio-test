@@ -7,7 +7,9 @@ import {
   varchar,
   text,
   pgEnum,
+  jsonb,
 } from "drizzle-orm/pg-core";
+import type { Message } from "./types";
 
 const primaryKeyColumn = {
   id: uuid("id")
@@ -45,24 +47,25 @@ export const abstractUsers = pgTable("abstract_users", {
   image: text("image"),
   role: userRoleEnum(),
 });
-
 export const users = pgTable("users", {
-  ...primaryKeyColumn,
+  id: uuid("id")
+    .primaryKey()
+    .references(() => abstractUsers.id, {
+      onDelete: "cascade",
+    }),
   ...timestampColumns,
   locale: localeType,
-  abstractUserId: uuid("abstract_user_id").references(() => abstractUsers.id, {
-    onDelete: "cascade",
-  }),
 });
 
 export const genius = pgTable("genius", {
-  ...primaryKeyColumn,
+  id: uuid("id")
+    .primaryKey()
+    .references(() => abstractUsers.id, {
+      onDelete: "cascade",
+    }),
   ...timestampColumns,
   locales: localeType.array().default(sql`ARRAY[]::text[]`),
   isOnline: boolean("is_online").notNull().default(false),
-  abstractUserId: uuid("abstract_user_id").references(() => abstractUsers.id, {
-    onDelete: "cascade",
-  }),
 });
 
 export const sessions = pgTable("sessions", {
@@ -102,13 +105,25 @@ export const verifications = pgTable("verifications", {
   expiresAt: timestamp("expires_at").notNull(),
 });
 
+export const statusConvEnum = pgEnum("status", [
+  // User has started a conversation, waiting for a genius.
+  "init",
+  // Conversation is active, both user and genius are having a conversation.
+  "active",
+  // Conversation is closed or too old.
+  "inactive",
+]);
+
 export const conversations = pgTable("conversations", {
   ...primaryKeyColumn,
   ...timestampColumns,
-  user: uuid("user_id").references(() => abstractUsers.id, {
+  status: statusConvEnum(),
+  userId: uuid("user_id").references(() => abstractUsers.id, {
     onDelete: "set null",
   }),
-  genius: uuid("genius_id").references(() => genius.id, {
+  geniusId: uuid("genius_id").references(() => genius.id, {
     onDelete: "set null",
   }),
+  userMessages: jsonb().$type<Message[]>().default([]).notNull(),
+  geniusMessages: jsonb().$type<Message[]>().default([]).notNull(),
 });
