@@ -90,7 +90,7 @@ const rpc = app
           userId: user.id,
           status: "init",
           userMessages: [
-            { content: messageContent, createdAt: messageCreatedAt },
+            { content: messageContent, timestamp: messageCreatedAt },
           ],
         })
         .returning();

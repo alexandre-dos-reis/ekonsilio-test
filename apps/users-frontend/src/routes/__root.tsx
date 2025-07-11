@@ -17,7 +17,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
       <Navbar />
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-xl mx-auto py-10">
         <Suspense fallback={<div>loading...</div>}>
           <Outlet />
         </Suspense>

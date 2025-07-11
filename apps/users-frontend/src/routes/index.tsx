@@ -1,7 +1,8 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { client } from "@/utils/client";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { getRelativeTime } from "@/utils/func";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -56,17 +57,29 @@ function RouteComponent() {
       >
         Send your first message
       </Button>
-      <h2 className="text-2xl font-bold">Your past conversations</h2>
-      <ul>
-        {pastConversations.map((c) => {
-          const firstMessage = c.userMessages.at(0);
-          return (
-            <li>
-              <div>{firstMessage?.content}</div>
-              <div>{firstMessage?.createdAt}</div>
-            </li>
-          );
-        })}
+      <h2 className="text-2xl font-bold pb-5 py-10">Your past conversations</h2>
+      <ul className="flex flex-gap flex-wrap gap-3 list">
+        {pastConversations
+          .sort(
+            (a, b) =>
+              (b.userMessages[0]?.timestamp || 0) -
+              (a.userMessages[0]?.timestamp || 0),
+          )
+          .map((c) => {
+            const firstMessage = c.userMessages.at(0);
+            return (
+              <li>
+                <Link
+                  to="/chat/$conversationId"
+                  params={{ conversationId: c.id }}
+                  className="list-row bg-base-300 p-2 flex justify-between"
+                >
+                  <div>content {firstMessage?.content}</div>
+                  <div>{getRelativeTime(firstMessage?.timestamp || 0)}</div>
+                </Link>
+              </li>
+            );
+          })}
       </ul>
     </>
   );
