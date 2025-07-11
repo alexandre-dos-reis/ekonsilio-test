@@ -28,6 +28,10 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [isPending, data?.user]);
 
+  if (isPending) {
+    return null;
+  }
+
   return (
     <UserContext
       value={{

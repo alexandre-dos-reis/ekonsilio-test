@@ -49,6 +49,22 @@ app
   })
   .on(["POST", "GET"], ` ${authGeniusPath}/**`, (c) => {
     return geniusAuth.handler(c.req.raw);
+  });
+
+const rpc = app
+  .get("/chat", async (c) => {
+    const user = c.get("user");
+
+    if (!user) {
+      return c.json({ error: "User must be authenticated !" });
+    }
+
+    const convs = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.userId, user.id));
+
+    return c.json(convs);
   })
   .post(
     "/chat/new",
@@ -56,7 +72,7 @@ app
       "json",
       z.object({
         messageContent: z.string().nonempty(),
-        messageCreatedAt: z.string().nonempty(),
+        messageCreatedAt: z.number(),
       }),
     ),
     async (c) => {
@@ -120,6 +136,8 @@ app
     console.log(result.rows);
     return c.text("ok");
   });
+
+export type Rpc = typeof rpc;
 
 const server = serve(
   {

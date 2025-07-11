@@ -1,36 +1,73 @@
 import { Button } from "@/components/Button";
-import { ChatBubble } from "@/components/ChatBubble";
 import { Input } from "@/components/Input";
-import { useUserContext } from "@/contexts/user";
-import type { User } from "@/utils/types";
-import { createFileRoute } from "@tanstack/react-router";
+import { client } from "@/utils/client";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const res = await client.chat.$get();
+    return res.json();
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { user } = useUserContext();
-  const genius: User = { role: "genius", name: "Genius John" };
+  const pastConversations = Route.useLoaderData();
+  const nav = useNavigate();
+  const [firstMessage, setFirstMessage] = useState("");
 
-  if (!user) return null;
+  if ("error" in pastConversations) {
+    return <div>{pastConversations.error}</div>;
+  }
 
   return (
     <>
-      <div className="py-5 h-full">
-        <ChatBubble
-          user={user!}
-          message={{ content: "Hello there !", createdAt: "5 min ago" }}
-        />
-        <ChatBubble
-          user={genius}
-          message={{ content: "How can I help you ?", createdAt: "5 min ago" }}
-        />
-      </div>
-      <Input label="Enter your message" />
-      <div className="flex justify-end">
-        <Button>Send your message</Button>
-      </div>
+      <h2 className="text-2xl font-bold">Start a new conversation</h2>
+      <Input
+        value={firstMessage}
+        onChange={(e) => setFirstMessage(e.target.value)}
+      />
+      <Button
+        onClick={async () => {
+          if (firstMessage) {
+            const res = await client.chat.new.$post({
+              json: {
+                messageContent: firstMessage,
+                messageCreatedAt: Date.now(),
+              },
+            });
+
+            if (res.ok) {
+              const conv = await res.json();
+
+              if ("error" in conv) {
+                toast(conv.error);
+              } else {
+                nav({
+                  to: "/chat/$conversationId",
+                  params: { conversationId: conv.id },
+                });
+              }
+            }
+          }
+        }}
+      >
+        Send your first message
+      </Button>
+      <h2 className="text-2xl font-bold">Your past conversations</h2>
+      <ul>
+        {pastConversations.map((c) => {
+          const firstMessage = c.userMessages.at(0);
+          return (
+            <li>
+              <div>{firstMessage?.content}</div>
+              <div>{firstMessage?.createdAt}</div>
+            </li>
+          );
+        })}
+      </ul>
     </>
   );
 }

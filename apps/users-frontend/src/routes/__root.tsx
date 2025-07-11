@@ -7,6 +7,7 @@ import { Navbar } from "../components/Navbar";
 
 import { ToastContainer } from "react-toastify";
 import { type UserContextType } from "@/contexts/user";
+import { Suspense } from "react";
 
 interface RouterContext {
   auth: UserContextType;
@@ -17,7 +18,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     <>
       <Navbar />
       <div className="max-w-xl mx-auto">
-        <Outlet />
+        <Suspense fallback={<div>loading...</div>}>
+          <Outlet />
+        </Suspense>
       </div>
       <ToastContainer position="bottom-center" />
     </>
