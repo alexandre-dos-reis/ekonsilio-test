@@ -5,7 +5,7 @@ import { env } from "./env";
 import { db } from "./db";
 import { userAuth, geniusAuth } from "./auth";
 import { cors } from "hono/cors";
-import { abstractUsers, conversations, genius, users } from "./db/schema";
+import { abstractUsers, conversations } from "./db/schema";
 
 import { eq } from "drizzle-orm";
 import z from "zod";
@@ -107,28 +107,27 @@ const rpc = app
       .where(eq(conversations.id, convId));
 
     if (!conv) {
-      return c.json({ conversation: null });
+      return c.json(null);
     }
 
-    const [[user], [geniusUser]] = await Promise.all([
-      db
-        .select()
-        .from(users)
-        .leftJoin(abstractUsers, eq(abstractUsers.id, users.id))
-        .where(eq(users.id, conv.user!)),
-      db
-        .select()
-        .from(genius)
-        .leftJoin(abstractUsers, eq(abstractUsers.id, genius.id))
-        .where(eq(genius.id, conv.genius!)),
-    ]);
+    const [user] = conv.userId
+      ? await db
+          .select()
+          .from(abstractUsers)
+          .where(eq(abstractUsers.id, conv.userId || ""))
+      : [null];
+
+    const [geniusUser] = conv.geniusId
+      ? await db
+          .select()
+          .from(abstractUsers)
+          .where(eq(abstractUsers.id, conv.geniusId || ""))
+      : [null];
 
     return c.json({
-      conversation: {
-        ...conv,
-        user: user.abstract_users,
-        genius: geniusUser.abstract_users,
-      },
+      ...conv,
+      user,
+      genius: geniusUser,
     });
   })
   .get("/", async (c) => {

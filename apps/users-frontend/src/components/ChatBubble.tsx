@@ -1,12 +1,17 @@
+import { getRelativeTime } from "@/utils/func";
 import type { User } from "@/utils/types";
 import { cn } from "@ek/style";
 
-export const ChatBubble = ({
-  user,
-  message,
-}: {
+export type Message = {
+  content: string;
+  timestamp: number;
   user: NonNullable<User>;
-  message: { content: string; createdAt: string };
+};
+
+export const ChatBubble = ({
+  message: { timestamp, content, user },
+}: {
+  message: Message;
 }) => {
   const isGenius = user.role === "genius";
   const isUser = user.role === "user";
@@ -31,11 +36,11 @@ export const ChatBubble = ({
           isGenius ? "chat-bubble-accent" : "chat-bubble-info",
         )}
       >
-        {message.content}
+        {content}
       </div>
       <time className="chat-footer text-xs opacity-50">
         {isUser && "You - "}
-        {message.createdAt}
+        {getRelativeTime(timestamp)}
       </time>
     </div>
   );

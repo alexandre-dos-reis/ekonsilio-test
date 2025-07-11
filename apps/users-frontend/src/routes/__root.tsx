@@ -1,13 +1,8 @@
-import {
-  createRootRouteWithContext,
-  Link,
-  Outlet,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Navbar } from "../components/Navbar";
 
 import { ToastContainer } from "react-toastify";
 import { type UserContextType } from "@/contexts/user";
-import { Suspense } from "react";
 
 interface RouterContext {
   auth: UserContextType;
@@ -18,9 +13,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     <>
       <Navbar />
       <div className="max-w-xl mx-auto py-10">
-        <Suspense fallback={<div>loading...</div>}>
-          <Outlet />
-        </Suspense>
+        <Outlet />
       </div>
       <ToastContainer position="bottom-center" />
     </>

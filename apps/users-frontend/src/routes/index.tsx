@@ -74,7 +74,7 @@ function RouteComponent() {
                   params={{ conversationId: c.id }}
                   className="list-row bg-base-300 p-2 flex justify-between"
                 >
-                  <div>content {firstMessage?.content}</div>
+                  <div>{firstMessage?.content}</div>
                   <div>{getRelativeTime(firstMessage?.timestamp || 0)}</div>
                 </Link>
               </li>
