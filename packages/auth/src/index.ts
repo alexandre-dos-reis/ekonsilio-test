@@ -10,6 +10,7 @@ export const getAuth = (args: {
   role: "customer" | "genius";
   basePath?: string;
   db: Parameters<typeof drizzleAdapter>[0];
+  secret: string; // Used for signing, hashing and encryption
 }) =>
   betterAuth({
     basePath:
@@ -19,6 +20,7 @@ export const getAuth = (args: {
           ? geniusAuthBasePath
           : args.basePath,
     trustedOrigins: [args.trustedOrigin],
+    secret: args.secret,
     database: drizzleAdapter(args.db, {
       provider: "pg",
       schema: {

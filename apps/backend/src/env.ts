@@ -14,8 +14,12 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     PORT: portSchema(3000),
+
     APP_CUSTOMER_TRUSTED_ORIGIN: z.url(),
+    CUSTOMER_AUTH_SECRET: stringSchema.default("my-customer-auth-secret"),
+
     APP_GENIUS_TRUSTED_ORIGIN: z.url(),
+    GENIUS_AUTH_SECRET: stringSchema.default("my-genius-auth-secret"),
 
     POSTGRES_USER: stringSchema,
     POSTGRES_PASSWORD: stringSchema,

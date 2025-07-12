@@ -8,14 +8,13 @@
   ],
   "scripts": {
     "dev": "bun --filter '*' dev",
-    "db:generate": "bun drizzle-kit generate",
-    "db:migrate": "bun drizzle-kit migrate",
-    "db:push": "bun drizzle-kit push",
-    "auth:generate": "bunx @better-auth/cli generate --config ./apps/backend/src/auth.ts"
+    "project": "bun --filter --",
+    "db:generate": "cd packages/db && bun run db:generate",
+    "db:migrate": "cd packages/db && bun run db:migrate",
+    "db:push": "cd packages/db && bun run db:push"
   },
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
-    "dotenv": "^17.2.0",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   },

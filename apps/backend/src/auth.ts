@@ -6,10 +6,12 @@ export const customerAuth = getAuth({
   db,
   role: "customer",
   trustedOrigin: env.APP_CUSTOMER_TRUSTED_ORIGIN,
+  secret: env.CUSTOMER_AUTH_SECRET,
 });
 
 export const geniusAuth = getAuth({
   db,
   role: "genius",
   trustedOrigin: env.APP_GENIUS_TRUSTED_ORIGIN,
+  secret: env.GENIUS_AUTH_SECRET,
 });

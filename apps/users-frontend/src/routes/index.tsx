@@ -67,7 +67,7 @@ function RouteComponent() {
           .map((c) => {
             const firstMessage = c.customerMessages.at(0);
             return (
-              <li>
+              <li key={c.id}>
                 <Link
                   to="/chat/$conversationId"
                   params={{ conversationId: c.id }}

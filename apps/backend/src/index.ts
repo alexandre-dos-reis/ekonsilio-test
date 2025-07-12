@@ -51,7 +51,7 @@ app
 
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
-const usersOnline: Record<
+const customersOnline: Record<
   string, // conversationId
   string // userId
 > = {};
@@ -141,7 +141,7 @@ const rpc = app
           console.log(
             `user ${user.name} is connected to conversation ${convId}`,
           );
-          usersOnline[convId] = user.id;
+          customersOnline[convId] = user.id;
         },
         onMessage: (event, ws) => {
           console.log(`Message from client: ${event.data}`);
@@ -149,7 +149,7 @@ const rpc = app
         },
         onClose: (event, ws) => {
           console.log(`user ${user.name} has left conversation ${convId}`);
-          delete usersOnline[convId];
+          delete customersOnline[convId];
         },
         onError: (event, ws) => {
           console.log("WS Error");
@@ -158,7 +158,7 @@ const rpc = app
     }),
   )
   .get("/usersOnline", (c) => {
-    return c.json(usersOnline);
+    return c.json(customersOnline);
   })
   .get("/", async (c) => {
     const result = await db.execute("select 1");
