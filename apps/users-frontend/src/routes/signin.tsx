@@ -34,9 +34,10 @@ function RouteComponent() {
           });
 
           if (error) {
+            console.log(error);
             switch (error.code) {
-              case "USER_ALREADY_EXISTS":
-                toast("Email is already taken !", { type: "error" });
+              case "INVALID_EMAIL_OR_PASSWORD":
+                toast("Email or password is invalid !", { type: "error" });
                 break;
               default:
                 toast("An error occured, try again later !", {
