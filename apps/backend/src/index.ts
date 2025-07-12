@@ -3,16 +3,22 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { env } from "./env";
 import { db } from "./db";
-import { userAuth, geniusAuth } from "./auth";
+import {
+  customerAuth,
+  customerAuthBasePath,
+  geniusAuth,
+  geniusAuthBasePath,
+} from "./auth";
 import { cors } from "hono/cors";
-import { abstractUsers, conversations } from "./db/schema";
+import { users, conversations } from "./db/schema";
+import { createNodeWebSocket } from "@hono/node-ws";
 
 import { eq } from "drizzle-orm";
 import z from "zod";
 
 const app = new Hono<{
   Variables: {
-    user: (typeof userAuth)["$Infer"]["Session"]["user"] | null;
+    customer: (typeof customerAuth)["$Infer"]["Session"]["user"] | null;
     genius: (typeof geniusAuth)["$Infer"]["Session"]["user"] | null;
   };
 }>();
@@ -20,7 +26,7 @@ const app = new Hono<{
 app.use(
   "*",
   cors({
-    origin: [env.APP_USER_TRUSTED_ORIGIN, env.APP_GENIUS_TRUSTED_ORIGIN],
+    origin: [env.APP_CUSTOMER_TRUSTED_ORIGIN, env.APP_GENIUS_TRUSTED_ORIGIN],
     credentials: true,
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -28,41 +34,44 @@ app.use(
 );
 
 app.use("*", async (c, next) => {
-  const [userSession, geniusSession] = await Promise.all([
-    userAuth.api.getSession({ headers: c.req.raw.headers }),
+  const [customerSession, geniusSession] = await Promise.all([
+    customerAuth.api.getSession({ headers: c.req.raw.headers }),
     geniusAuth.api.getSession({ headers: c.req.raw.headers }),
   ]);
 
-  c.set("user", userSession ? userSession.user : null);
+  c.set("customer", customerSession ? customerSession.user : null);
   c.set("genius", geniusSession ? geniusSession.user : null);
 
   return next();
 });
 
-// TODO: Move auth to its own packages
-const authUserPath = "/api/auth/user";
-const authGeniusPath = "/api/auth/genius";
-
 app
-  .on(["POST", "GET"], `${authUserPath}/**`, (c) => {
-    return userAuth.handler(c.req.raw);
+  .on(["POST", "GET"], `${customerAuthBasePath}/**`, (c) => {
+    return customerAuth.handler(c.req.raw);
   })
-  .on(["POST", "GET"], ` ${authGeniusPath}/**`, (c) => {
+  .on(["POST", "GET"], ` ${geniusAuthBasePath}/**`, (c) => {
     return geniusAuth.handler(c.req.raw);
   });
 
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
+
+const usersOnline: Record<
+  string, // conversationId
+  string // userId
+> = {};
+
 const rpc = app
   .get("/chat", async (c) => {
-    const user = c.get("user");
+    const customer = c.get("customer");
 
-    if (!user) {
-      return c.json({ error: "User must be authenticated !" });
+    if (!customer) {
+      return c.json({ error: "Customer must be authenticated !" });
     }
 
     const convs = await db
       .select()
       .from(conversations)
-      .where(eq(conversations.userId, user.id));
+      .where(eq(conversations.customerId, customer.id));
 
     return c.json(convs);
   })
@@ -72,25 +81,25 @@ const rpc = app
       "json",
       z.object({
         messageContent: z.string().nonempty(),
-        messageCreatedAt: z.number(),
+        messageTimestamp: z.number(),
       }),
     ),
     async (c) => {
-      const user = c.get("user");
+      const customer = c.get("customer");
 
-      if (!user) {
+      if (!customer) {
         return c.json({ error: "User must be authenticated !" });
       }
 
-      const { messageContent, messageCreatedAt } = c.req.valid("json");
+      const { messageContent, messageTimestamp } = c.req.valid("json");
 
       const [conv] = await db
         .insert(conversations)
         .values({
-          userId: user.id,
+          customerId: customer.id,
           status: "init",
-          userMessages: [
-            { content: messageContent, timestamp: messageCreatedAt },
+          customerMessages: [
+            { content: messageContent, timestamp: messageTimestamp },
           ],
         })
         .returning();
@@ -110,26 +119,50 @@ const rpc = app
       return c.json(null);
     }
 
-    const [[user], [geniusUser]] = await Promise.all([
-      conv.userId
-        ? db
-            .select()
-            .from(abstractUsers)
-            .where(eq(abstractUsers.id, conv.userId))
+    const [[customer], [genius]] = await Promise.all([
+      conv.customerId
+        ? db.select().from(users).where(eq(users.id, conv.customerId))
         : [null],
-      true
-        ? await db
-            .select()
-            .from(abstractUsers)
-            .where(eq(abstractUsers.id, "2a410152-a650-4c29-a16b-8dabd3dea49d"))
+      conv.geniusId
+        ? await db.select().from(users).where(eq(users.id, conv.geniusId))
         : [null],
     ]);
 
     return c.json({
       ...conv,
-      user,
-      genius: geniusUser,
+      customer,
+      genius,
     });
+  })
+  .get(
+    "/chat/:conversationId/ws",
+    upgradeWebSocket((c) => {
+      const convId = c.req.param("conversationId");
+      const user = c.get("user");
+
+      return {
+        onOpen: (event, ws) => {
+          console.log(
+            `user ${user.name} is connected to conversation ${convId}`,
+          );
+          usersOnline[convId] = user.id;
+        },
+        onMessage: (event, ws) => {
+          console.log(`Message from client: ${event.data}`);
+          ws.send("Hello from server!");
+        },
+        onClose: (event, ws) => {
+          console.log(`user ${user.name} has left conversation ${convId}`);
+          delete usersOnline[convId];
+        },
+        onError: (event, ws) => {
+          console.log("WS Error");
+        },
+      };
+    }),
+  )
+  .get("/usersOnline", (c) => {
+    return c.json(usersOnline);
   })
   .get("/", async (c) => {
     const result = await db.execute("select 1");
@@ -148,6 +181,8 @@ const server = serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   },
 );
+
+injectWebSocket(server);
 
 // graceful shutdown
 process.on("SIGINT", () => {

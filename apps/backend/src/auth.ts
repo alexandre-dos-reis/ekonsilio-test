@@ -1,12 +1,12 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
-import { abstractUsers, accounts, sessions, verifications } from "./db/schema";
+import { users, accounts, sessions, verifications } from "./db/schema";
 import { env } from "./env";
 
 const authFn = (args: {
   trustedOrigin: string;
-  role: "user" | "genius";
+  role: "customer" | "genius";
   basePath: string;
 }) =>
   betterAuth({
@@ -15,7 +15,7 @@ const authFn = (args: {
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {
-        user: abstractUsers,
+        user: users,
         account: accounts,
         session: sessions,
         verification: verifications,
@@ -46,18 +46,23 @@ const authFn = (args: {
     },
   });
 
-export const auth = authFn({
-  basePath: "/api/auth/user",
-  role: "user",
-  trustedOrigin: env.APP_USER_TRUSTED_ORIGIN,
+const basePath = "/auth";
+
+export const customerAuthBasePath = `${basePath}/customer`;
+export const geniusAuthBasePath = `${basePath}/genius`;
+
+export const customerAuth = authFn({
+  basePath: customerAuthBasePath,
+  role: "customer",
+  trustedOrigin: env.APP_CUSTOMER_TRUSTED_ORIGIN,
 });
 
-export const userAuth = auth;
-
 export const geniusAuth = authFn({
-  basePath: "/api/auth/genius",
+  basePath: geniusAuthBasePath,
   role: "genius",
   trustedOrigin: env.APP_GENIUS_TRUSTED_ORIGIN,
 });
 
-export type Auth = ReturnType<typeof authFn>;
+export const auth = customerAuth;
+
+export type Auth = typeof auth;

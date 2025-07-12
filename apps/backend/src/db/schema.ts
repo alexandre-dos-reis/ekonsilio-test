@@ -4,7 +4,6 @@ import {
   boolean,
   uuid,
   timestamp,
-  varchar,
   text,
   pgEnum,
   jsonb,
@@ -31,12 +30,9 @@ const timestampColumns = {
   // https://github.com/drizzle-team/drizzle-orm/issues/956
 };
 
-//format: xx-XX | ex: fr-FR
-const localeType = varchar({ length: 5 });
+export const userRoleEnum = pgEnum("user_role", ["customer", "genius"]);
 
-export const userRoleEnum = pgEnum("user_role", ["user", "genius"]);
-
-export const abstractUsers = pgTable("abstract_users", {
+export const users = pgTable("users", {
   ...primaryKeyColumn,
   ...timestampColumns,
   name: text("name").notNull(),
@@ -46,26 +42,6 @@ export const abstractUsers = pgTable("abstract_users", {
     .notNull(),
   image: text("image"),
   role: userRoleEnum(),
-});
-export const users = pgTable("users", {
-  id: uuid("id")
-    .primaryKey()
-    .references(() => abstractUsers.id, {
-      onDelete: "cascade",
-    }),
-  ...timestampColumns,
-  locale: localeType,
-});
-
-export const genius = pgTable("genius", {
-  id: uuid("id")
-    .primaryKey()
-    .references(() => abstractUsers.id, {
-      onDelete: "cascade",
-    }),
-  ...timestampColumns,
-  locales: localeType.array().default(sql`ARRAY[]::text[]`),
-  isOnline: boolean("is_online").notNull().default(false),
 });
 
 export const sessions = pgTable("sessions", {
@@ -77,7 +53,7 @@ export const sessions = pgTable("sessions", {
   userAgent: text("user_agent"),
   userId: uuid("user_id")
     .notNull()
-    .references(() => abstractUsers.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 export const accounts = pgTable("accounts", {
@@ -87,7 +63,7 @@ export const accounts = pgTable("accounts", {
   providerId: text("provider_id").notNull(),
   userId: uuid("user_id")
     .notNull()
-    .references(() => abstractUsers.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -118,12 +94,12 @@ export const conversations = pgTable("conversations", {
   ...primaryKeyColumn,
   ...timestampColumns,
   status: statusConvEnum(),
-  userId: uuid("user_id").references(() => abstractUsers.id, {
+  customerId: uuid("customer_id").references(() => users.id, {
     onDelete: "set null",
   }),
-  geniusId: uuid("genius_id").references(() => genius.id, {
+  geniusId: uuid("genius_id").references(() => users.id, {
     onDelete: "set null",
   }),
-  userMessages: jsonb().$type<Message[]>().default([]).notNull(),
+  customerMessages: jsonb().$type<Message[]>().default([]).notNull(),
   geniusMessages: jsonb().$type<Message[]>().default([]).notNull(),
 });
