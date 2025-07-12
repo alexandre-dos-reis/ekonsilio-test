@@ -1,4 +1,4 @@
-import { cn } from "@ek/style";
+import { cn } from "./cn";
 
 export const Button = (
   props: React.DetailedHTMLProps<

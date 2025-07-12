@@ -1,9 +1,5 @@
-import { inferAdditionalFields } from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/react";
-import { type Auth } from "./types";
+import { getCustomerAuthClient } from "@ek/auth/react";
 
-export const authClient = createAuthClient({
+export const authClient = getCustomerAuthClient({
   baseURL: "http://localhost:3001",
-  plugins: [inferAdditionalFields<Auth>()],
-  basePath: "/api/auth/user",
 });

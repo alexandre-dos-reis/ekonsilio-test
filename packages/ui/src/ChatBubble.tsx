@@ -1,11 +1,10 @@
-import { getRelativeTime } from "@/utils/func";
-import type { User } from "@/utils/types";
-import { cn } from "@ek/style";
+import { cn } from "./cn";
+import { getRelativeTime } from "./func";
 
 export type Message = {
   content: string;
   timestamp: number;
-  user: NonNullable<User>;
+  user: { id: string; role: "genius" | "customer"; name: string };
 };
 
 export const ChatBubble = ({
@@ -14,7 +13,7 @@ export const ChatBubble = ({
   message: Message;
 }) => {
   const isGenius = user.role === "genius";
-  const isUser = user.role === "user";
+  const isUser = user.role === "customer";
   return (
     <div className={cn("chat", isGenius ? "chat-start" : "chat-end")}>
       <div className="chat-image avatar">

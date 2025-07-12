@@ -1,13 +1,11 @@
-import { Button } from "@/components/Button";
-import { ChatBubble, type Message } from "@/components/ChatBubble";
-import { Input } from "@/components/Input";
+import { Alert, Button, ChatBubble, Input, type Message } from "@ek/ui";
 import { client } from "@/utils/client";
 import {
   createFileRoute,
   type RegisteredRouter,
   type RouteById,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/chat/$conversationId")({
   loader: async ({ params: { conversationId } }) => {
@@ -29,9 +27,9 @@ function getMessages(
     return [];
   }
 
-  const userMessages = conversation.userMessages.map((m) => ({
+  const customerMessages = conversation.customerMessages.map((m) => ({
     ...m,
-    user: conversation.user!,
+    user: conversation.customer!,
   }));
 
   const geniusMessages = conversation.geniusMessages.map((m) => ({
@@ -39,18 +37,64 @@ function getMessages(
     user: conversation.genius!,
   }));
 
-  return [...userMessages, ...geniusMessages].sort(
+  return [...customerMessages, ...geniusMessages].sort(
     (a, b) => a.timestamp - b.timestamp,
   );
 }
 
 function RouteComponent() {
+  const conversation = Route.useLoaderData();
+  const { conversationId } = Route.useParams();
+
+  const [status, setStatus] = useState<
+    NonNullable<typeof conversation>["status"]
+  >(conversation?.status || "init");
+
   const [messages, setMessages] = useState<Array<Message>>(
-    getMessages(Route.useLoaderData()),
+    getMessages(conversation),
   );
+
+  const ws = client.chat[":conversationId"].ws.$ws({
+    param: { conversationId },
+  });
+
+  useEffect(() => {
+    ws.addEventListener("open", (event) => {
+      console.log("client open event");
+      // ws.send("client connected");
+    });
+    ws.addEventListener("message", (event) => {
+      console.log("client message event");
+      console.log(event.data);
+    });
+    ws.addEventListener("close", (event) => {
+      console.log("client close event");
+    });
+    ws.addEventListener("error", (event) => {
+      console.log("client error event");
+    });
+
+    return () => {
+      ws.removeEventListener("open", (event) => {});
+      ws.removeEventListener("message", (event) => {});
+      ws.removeEventListener("close", (event) => {});
+      ws.removeEventListener("error", (event) => {});
+      ws.close();
+    };
+  }, []);
 
   return (
     <>
+      {status === "init" && (
+        <Alert type="warning">
+          Please wait for a genius to join your conversation...
+        </Alert>
+      )}
+      {status === "inactive" && (
+        <Alert type="error">
+          This conversation is closed, please open a new one.
+        </Alert>
+      )}
       <div className="py-5 h-full">
         {messages.map((m) => (
           <ChatBubble

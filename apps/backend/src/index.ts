@@ -3,18 +3,14 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { env } from "./env";
 import { db } from "./db";
-import {
-  customerAuth,
-  customerAuthBasePath,
-  geniusAuth,
-  geniusAuthBasePath,
-} from "./auth";
+import { customerAuth, geniusAuth } from "./auth";
 import { cors } from "hono/cors";
-import { users, conversations } from "./db/schema";
+import { users, conversations } from "@ek/db";
 import { createNodeWebSocket } from "@hono/node-ws";
 
 import { eq } from "drizzle-orm";
 import z from "zod";
+import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 
 const app = new Hono<{
   Variables: {

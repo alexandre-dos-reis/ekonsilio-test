@@ -6,7 +6,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { authClient } from "@/utils/auth";
-import type { User } from "@/utils/types";
+import type { User } from "@ek/auth";
 
 export type UserContextType = {
   user: User;

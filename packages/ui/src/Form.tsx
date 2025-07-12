@@ -1,4 +1,4 @@
-import { cn } from "@ek/style";
+import { cn } from "./cn";
 
 export const Form = (
   props: React.DetailedHTMLProps<

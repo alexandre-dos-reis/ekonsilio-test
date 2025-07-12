@@ -1,7 +1,6 @@
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
 import { client } from "@/utils/client";
-import { getRelativeTime } from "@/utils/func";
+import { getRelativeTime } from "@ek/ui";
+import { Button, Input } from "@ek/ui";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -36,7 +35,7 @@ function RouteComponent() {
             const res = await client.chat.new.$post({
               json: {
                 messageContent: firstMessage,
-                messageCreatedAt: Date.now(),
+                messageTimestamp: Date.now(),
               },
             });
 
@@ -62,11 +61,11 @@ function RouteComponent() {
         {pastConversations
           .sort(
             (a, b) =>
-              (b.userMessages[0]?.timestamp || 0) -
-              (a.userMessages[0]?.timestamp || 0),
+              (b.customerMessages[0]?.timestamp || 0) -
+              (a.customerMessages[0]?.timestamp || 0),
           )
           .map((c) => {
-            const firstMessage = c.userMessages.at(0);
+            const firstMessage = c.customerMessages.at(0);
             return (
               <li>
                 <Link

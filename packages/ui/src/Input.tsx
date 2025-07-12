@@ -1,4 +1,4 @@
-import { cn } from "@ek/style";
+import { cn } from "./cn";
 
 interface Props
   extends React.DetailedHTMLProps<

@@ -1,0 +1,14 @@
+{
+  "name": "@ek/auth",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react.ts"
+  },
+  "dependencies": {
+    "@ek/db": "workspace:*",
+    "@better-auth/cli": "^1.2.12",
+    "better-auth": "^1.2.12"
+  }
+}
