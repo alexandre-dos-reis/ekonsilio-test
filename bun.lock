@@ -14,6 +14,7 @@
       "dependencies": {
         "@ek/auth": "workspace:*",
         "@ek/db": "workspace:*",
+        "@ek/types": "workspace:*",
         "@hono/node-server": "^1.15.0",
         "@hono/node-ws": "^1.2.0",
         "@hono/zod-validator": "^0.7.0",
@@ -30,6 +31,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@ek/auth": "workspace:*",
+        "@ek/types": "workspace:*",
         "@ek/ui": "workspace:*",
         "@tailwindcss/vite": "^4.1.11",
         "@tanstack/react-router": "^1.125.6",
@@ -76,6 +78,9 @@
         "@types/pg": "^8.15.4",
         "dotenv": "^17.2.0",
       },
+    },
+    "packages/types": {
+      "name": "@ek/types",
     },
     "packages/ui": {
       "name": "@ek/ui",
@@ -179,6 +184,8 @@
     "@ek/backend": ["@ek/backend@workspace:apps/backend"],
 
     "@ek/db": ["@ek/db@workspace:packages/db"],
+
+    "@ek/types": ["@ek/types@workspace:packages/types"],
 
     "@ek/ui": ["@ek/ui@workspace:packages/ui"],
 

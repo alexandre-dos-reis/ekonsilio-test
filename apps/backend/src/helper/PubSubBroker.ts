@@ -18,7 +18,7 @@ export type GlobalForwardFilter = (
   subs: Set<WS>,
 ) => boolean;
 
-export class PubSubBroker {
+export class PubSubBroker<T> {
   /**
    * Store in a Map a conversationId => Conversation
    * Multiple participant to a conversation
