@@ -94,12 +94,20 @@ export const conversations = pgTable("conversations", {
   ...primaryKeyColumn,
   ...timestampColumns,
   status: statusConvEnum(),
-  customerId: uuid("customer_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  geniusId: uuid("genius_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  customerMessages: jsonb().$type<Message[]>().default([]).notNull(),
-  geniusMessages: jsonb().$type<Message[]>().default([]).notNull(),
+});
+
+export const messages = pgTable("messages", {
+  ...primaryKeyColumn,
+  ...timestampColumns,
+  content: text("content").notNull(),
+  conversationId: uuid("conversation_id")
+    .references(() => conversations.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
 });
