@@ -7,23 +7,14 @@ export interface ConversationState {
 
 type WS = WSContext<WebSocket>;
 
-interface Conversation {
-  subscriptions: Set<WS>;
-  state: ConversationState;
-}
-
-export type GlobalForwardFilter = (
-  topic: string,
-  state: ConversationState,
-  subs: Set<WS>,
-) => boolean;
+export type GlobalForwardFilter = (topic: string, subs: Set<WS>) => boolean;
 
 export class PubSubBroker<TData extends Record<any, any>> {
   /**
-   * Store in a Map a conversationId => Conversation
+   * Store in a Map a conversationId => Set of websockets
    * Multiple participant to a conversation
    * */
-  conversations = new Map<string, Conversation>();
+  private conversations = new Map<string, Set<WS>>();
   /**
    * Store global subscribers
    * */
@@ -34,34 +25,23 @@ export class PubSubBroker<TData extends Record<any, any>> {
   ) {}
 
   subscribe(convId: string, ws: WS) {
-    if (this.globalSubscriptions.has(ws)) {
-      throw new Error("Socket is a global subscriber and cannot join rooms");
-    }
-    let t = this.conversations.get(convId);
-    if (!t) {
-      this.conversations.set(convId, {
-        subscriptions: new Set([ws]),
-        state: { status: "init" },
-      });
-      return;
+    let conversation = this.conversations.get(convId);
+
+    if (!conversation) {
+      this.conversations.set(convId, new Set([ws]));
     } else {
-      t?.subscriptions.add(ws);
+      conversation.add(ws);
     }
   }
 
   unsubscribe(conv: string, ws: WS) {
-    this.conversations.get(conv)?.subscriptions.delete(ws);
-    if (this.conversations.get(conv)?.subscriptions.size === 0) {
+    this.conversations.get(conv)?.delete(ws);
+    if (this.conversations.get(conv)?.size === 0) {
       this.conversations.delete(conv);
     }
   }
 
   subscribeAll(ws: WS) {
-    for (const [, t] of this.conversations) {
-      if (t.subscriptions.has(ws)) {
-        throw new Error("Socket is already in a room and cannot become global");
-      }
-    }
     this.globalSubscriptions.add(ws);
   }
 
@@ -69,18 +49,7 @@ export class PubSubBroker<TData extends Record<any, any>> {
     this.globalSubscriptions.delete(ws);
   }
 
-  remove(ws: WS) {
-    for (const [, t] of this.conversations) {
-      t.subscriptions.delete(ws);
-    }
-    for (const [name, t] of this.conversations)
-      if (t.subscriptions.size === 0) {
-        this.conversations.delete(name);
-      }
-    this.globalSubscriptions.delete(ws);
-  }
-
-  private fanOut(targets: Set<WS>, data: TData, sender: WS) {
+  private send(targets: Set<WS>, data: TData, sender: WS) {
     for (const sock of targets) {
       if (sock === sender || sock.readyState !== sock.raw?.OPEN) {
         continue;
@@ -90,33 +59,15 @@ export class PubSubBroker<TData extends Record<any, any>> {
   }
 
   publish(convId: string, data: TData, sender: WS) {
-    const t = this.conversations.get(convId);
-    if (!t) return;
+    const conversation = this.conversations.get(convId);
+    if (!conversation) return;
 
-    // (1) send to the conversation
-    this.fanOut(t.subscriptions, data, sender);
+    // Send to the conversation
+    this.send(conversation, data, sender);
 
-    // (2) send to global listeners
-    // if (this.shouldForwardGlobally(convId, t.state, t.subscriptions)) {
-    //   this.fanOut(this.globalSubscriptions, data, sender);
-    // }
-  }
-
-  getConversationState(conv: string) {
-    return this.conversations.get(conv)?.state;
-  }
-
-  setConversationState(
-    conv: string,
-    patch:
-      | Partial<ConversationState>
-      | ((s: ConversationState) => ConversationState),
-  ) {
-    const t = this.conversations.get(conv);
-    if (!t) return;
-    t.state =
-      typeof patch === "function"
-        ? patch({ ...t.state })
-        : { ...t.state, ...patch };
+    // Send Globally it filters returns true
+    if (this.shouldForwardGlobally(convId, conversation)) {
+      this.send(this.globalSubscriptions, data, sender);
+    }
   }
 }

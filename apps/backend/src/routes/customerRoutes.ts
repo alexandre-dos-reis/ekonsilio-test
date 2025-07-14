@@ -4,6 +4,7 @@ import { conversations, messages, eq, getTableColumns, users } from "@ek/db";
 import z from "zod";
 import type { App } from "@/types";
 import { Hono } from "hono";
+import { customerAuth } from "@/auth";
 
 const conversationCols = (() => {
   const { id, status, createdAt } = getTableColumns(conversations);
@@ -17,6 +18,15 @@ const messageCols = (() => {
 
 export const customerRoutes = new Hono<App>()
   .basePath("/customers")
+  .use(async (c, next) => {
+    const customerSession = await customerAuth.api.getSession({
+      headers: c.req.raw.headers,
+    });
+
+    c.set("customer", customerSession ? customerSession.user : null);
+
+    return next();
+  })
   .get("/conversations", async (c) => {
     const customer = c.get("customer");
 
@@ -73,8 +83,8 @@ export const customerRoutes = new Hono<App>()
       return c.json({ ...conv, message: msg });
     },
   )
-  .get("/conversations/:conversationId", async (c) => {
-    const convId = c.req.param("conversationId");
+  .get("/conversations/:id", async (c) => {
+    const convId = c.req.param("id");
 
     const [[conv], msgs] = await Promise.all([
       db

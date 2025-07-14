@@ -3,27 +3,24 @@ import { Hono } from "hono";
 import { env } from "./env";
 import { customerAuth, geniusAuth } from "./auth";
 import { cors } from "hono/cors";
-
-import { createNodeWebSocket } from "@hono/node-ws";
-
 import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 import type { App } from "./types";
 import { customerRoutes } from "./routes/customerRoutes";
-import { geniusRoutes } from "./routes/geniusRoutes";
+import { createNodeWebSocket } from "@hono/node-ws";
 import { PubSubBroker } from "./helper/PubSubBroker";
 import { getData, type SocketMessage } from "@ek/shared";
-import { db } from "./db";
 import { messages } from "@ek/db";
+import { db } from "./db";
 
 const app = new Hono<App>();
 
-const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
+export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
   app,
 });
 
 const broker = new PubSubBroker<SocketMessage>();
 
-const routes = app
+app
   .use(
     "*",
     cors({
@@ -50,7 +47,7 @@ const routes = app
   .on(["POST", "GET"], `${geniusAuthBasePath}/**`, (c) => {
     return geniusAuth.handler(c.req.raw);
   })
-  .route("/", geniusRoutes)
+  // .route("/", geniusRoutes)
   .route("/", customerRoutes)
   .get(
     "chat/:conversationId",
@@ -87,8 +84,6 @@ const routes = app
     }),
   );
 
-export type Routes = typeof routes;
-
 const server = serve(
   {
     fetch: app.fetch,
@@ -99,7 +94,7 @@ const server = serve(
   },
 );
 
-injectWebSocket(server);
+// injectWebSocket(server);
 
 // graceful shutdown
 process.on("SIGINT", () => {

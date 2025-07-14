@@ -8,8 +8,8 @@ import { formatISO } from "date-fns";
 
 export const Route = createFileRoute("/chat/$conversationId")({
   loader: async ({ params: { conversationId } }) => {
-    const res = await client.conversations[":conversationId"].$get({
-      param: { conversationId },
+    const res = await client.conversations[":id"].$get({
+      param: { id: conversationId },
     });
     return res.json();
   },
