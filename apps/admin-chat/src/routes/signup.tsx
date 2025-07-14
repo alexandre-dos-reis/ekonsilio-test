@@ -14,8 +14,8 @@ export const Route = createFileRoute("/signup")({
 });
 
 function RouteComponent() {
-  const [email, setEmail] = useState("ajm.dosreis.daponte@gmail.com");
-  const [name, setName] = useState("Alexandre Dos Reis");
+  const [email, setEmail] = useState("super-genius@mail.com");
+  const [name, setName] = useState("John Doe");
   const [password, setPassword] = useState("password");
   const navigate = useNavigate({ from: "/signup" });
 

@@ -34,7 +34,7 @@ const app = new Hono<App>()
   .on(["POST", "GET"], `${customerAuthBasePath}/**`, (c) => {
     return customerAuth.handler(c.req.raw);
   })
-  .on(["POST", "GET"], ` ${geniusAuthBasePath}/**`, (c) => {
+  .on(["POST", "GET"], `${geniusAuthBasePath}/**`, (c) => {
     return geniusAuth.handler(c.req.raw);
   })
   .route("/", geniusRoutes)

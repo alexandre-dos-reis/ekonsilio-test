@@ -52,7 +52,7 @@ export const Navbar = () => {
     <div className="sticky top-0 z-10 navbar bg-base-100 shadow-sm">
       <div className="flex-1">
         <Link to="/" className="btn btn-ghost text-xl">
-          Live Chat
+          Admin Chat
         </Link>
       </div>
       <div className="flex-none">

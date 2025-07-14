@@ -1,11 +1,12 @@
-import { type CustomerRoutes } from "../../../backend/src/routes/customerRoutes";
+import { type GeniusRoutes } from "../../../backend/src/routes/geniusRoutes";
 import { type ChatRoutes } from "../../../backend/src/routes/chatRoutes";
 
 import { hc } from "hono/client";
 import type { Hono } from "hono";
+import { env } from "./env";
 
 const createClient = <THono extends Hono<any, any, any>>() =>
-  hc<THono>("http://localhost:3001", {
+  hc<THono>(env.VITE_BACKEND_URL, {
     fetch: ((input, init) => {
       return fetch(input, {
         ...init,
@@ -14,5 +15,5 @@ const createClient = <THono extends Hono<any, any, any>>() =>
     }) as typeof fetch,
   });
 
-export const client = createClient<CustomerRoutes>().customers;
+export const client = createClient<GeniusRoutes>().genius;
 export const wsClient = createClient<ChatRoutes>();

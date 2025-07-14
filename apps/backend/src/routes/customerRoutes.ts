@@ -1,13 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import { db } from "../db";
-import {
-  conversations,
-  messages,
-  eq,
-  getTableColumns,
-  desc,
-  users,
-} from "@ek/db";
+import { conversations, messages, eq, getTableColumns, users } from "@ek/db";
 import z from "zod";
 import type { App } from "@/types";
 import { Hono } from "hono";

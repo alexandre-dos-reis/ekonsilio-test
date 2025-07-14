@@ -6,5 +6,5 @@ export * from "drizzle-orm";
 export * from "./schema";
 
 export const getDatabase = (config?: PoolConfig) => {
-  return drizzle({ client: new Pool(config), schema, logger: true });
+  return drizzle({ client: new Pool(config), schema, logger: false });
 };

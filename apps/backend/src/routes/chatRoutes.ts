@@ -2,7 +2,7 @@ import { PubSubBroker } from "@/helper/PubSubBroker";
 import type { App } from "@/types";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
-import { type SocketMessage, sendData, getData } from "@ek/shared";
+import { type SocketMessage, getData } from "@ek/shared";
 import { db } from "@/db";
 import { messages } from "@ek/db";
 
@@ -16,15 +16,15 @@ const broker = new PubSubBroker<SocketMessage>();
 
 const chatRoutes = routes
   .get(
-    "/",
+    "/all",
     upgradeWebSocket((c) => {
-      const genius = c.get("genius");
-
       return {
         onOpen: (_, ws) => {
+          console.log("subscribeAll");
           broker.subscribeAll(ws);
         },
         onClose: (_, ws) => {
+          console.log("unsubscribeAll");
           broker.unsubscribeAll(ws);
         },
       };
