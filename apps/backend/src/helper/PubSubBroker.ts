@@ -18,7 +18,7 @@ export type GlobalForwardFilter = (
   subs: Set<WS>,
 ) => boolean;
 
-export class PubSubBroker<T> {
+export class PubSubBroker<TData extends Record<any, any>> {
   /**
    * Store in a Map a conversationId => Conversation
    * Multiple participant to a conversation
@@ -72,16 +72,16 @@ export class PubSubBroker<T> {
     this.globalSubscriptions.delete(ws);
   }
 
-  private fanOut(targets: Set<WS>, data: string | Buffer, sender: WS) {
+  private fanOut(targets: Set<WS>, data: TData, sender: WS) {
     for (const sock of targets) {
       if (sock === sender || sock.readyState !== sock.raw?.OPEN) {
         continue;
       }
-      sock.send(data);
+      sock.send(JSON.stringify(data));
     }
   }
 
-  publish(conv: string, data: string | Buffer, sender: WS) {
+  publish(conv: string, data: TData, sender: WS) {
     const t = this.conversations.get(conv);
     if (!t) return;
 

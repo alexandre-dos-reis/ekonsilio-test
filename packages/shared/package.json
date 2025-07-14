@@ -1,5 +1,5 @@
 {
-  "name": "@ek/types",
+  "name": "@ek/shared",
   "private": true,
   "type": "module",
   "exports": {

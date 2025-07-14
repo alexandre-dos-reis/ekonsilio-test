@@ -14,7 +14,7 @@
       "dependencies": {
         "@ek/auth": "workspace:*",
         "@ek/db": "workspace:*",
-        "@ek/types": "workspace:*",
+        "@ek/shared": "workspace:*",
         "@hono/node-server": "^1.15.0",
         "@hono/node-ws": "^1.2.0",
         "@hono/zod-validator": "^0.7.0",
@@ -31,10 +31,11 @@
       "version": "0.0.0",
       "dependencies": {
         "@ek/auth": "workspace:*",
-        "@ek/types": "workspace:*",
+        "@ek/shared": "workspace:*",
         "@ek/ui": "workspace:*",
         "@tailwindcss/vite": "^4.1.11",
         "@tanstack/react-router": "^1.125.6",
+        "date-fns": "^4.1.0",
         "hono": "^4.8.4",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
@@ -79,8 +80,8 @@
         "dotenv": "^17.2.0",
       },
     },
-    "packages/types": {
-      "name": "@ek/types",
+    "packages/shared": {
+      "name": "@ek/shared",
     },
     "packages/ui": {
       "name": "@ek/ui",
@@ -186,7 +187,7 @@
 
     "@ek/db": ["@ek/db@workspace:packages/db"],
 
-    "@ek/types": ["@ek/types@workspace:packages/types"],
+    "@ek/shared": ["@ek/shared@workspace:packages/shared"],
 
     "@ek/ui": ["@ek/ui@workspace:packages/ui"],
 

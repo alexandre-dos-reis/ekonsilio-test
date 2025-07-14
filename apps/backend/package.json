@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ek/db": "workspace:*",
-    "@ek/types": "workspace:*",
+    "@ek/shared": "workspace:*",
     "@ek/auth": "workspace:*",
     "@hono/node-server": "^1.15.0",
     "@hono/node-ws": "^1.2.0",

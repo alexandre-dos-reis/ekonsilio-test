@@ -1,12 +1,10 @@
-import { Alert, Button, ChatBubble, Input, type Message } from "@ek/ui";
+import { Alert, Button, ChatBubble, Input } from "@ek/ui";
 import { client, wsClient } from "@/utils/client";
-import {
-  createFileRoute,
-  type RegisteredRouter,
-  type RouteById,
-} from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
-import type { SocketMessage } from "@ek/types";
+import { createFileRoute } from "@tanstack/react-router";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { getData, sendData } from "@/utils/ws";
+import { useUserContext } from "@/contexts/user";
+import { formatISO } from "date-fns";
 
 export const Route = createFileRoute("/chat/$conversationId")({
   loader: async ({ params: { conversationId } }) => {
@@ -21,6 +19,7 @@ export const Route = createFileRoute("/chat/$conversationId")({
 function RouteComponent() {
   const conversation = Route.useLoaderData();
   const { conversationId } = Route.useParams();
+  const { user } = useUserContext();
 
   const [status, setStatus] = useState<
     NonNullable<typeof conversation>["status"]
@@ -29,8 +28,16 @@ function RouteComponent() {
   const [messages, setMessages] = useState(conversation?.messages || []);
   const [input, setInput] = useState("");
 
+  const ws = useMemo(
+    () =>
+      wsClient.chat[":conversationId"].$ws({
+        param: { conversationId },
+      }),
+    [],
+  );
+
   const onMessage = useCallback((event: MessageEvent) => {
-    const message = event.data as SocketMessage;
+    const message = getData(event.data);
     console.log(message);
     // switch (message.event) {
     //   case "message":
@@ -46,10 +53,6 @@ function RouteComponent() {
   }, []);
 
   useEffect(() => {
-    const ws = wsClient.chat[":conversationId"].$ws({
-      param: { conversationId },
-    });
-
     ws.addEventListener("message", onMessage);
 
     return () => {
@@ -85,6 +88,37 @@ function RouteComponent() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (input && user) {
+            const isoDate = formatISO(new Date());
+
+            setMessages((messages) => [
+              ...messages,
+              {
+                id: isoDate,
+                content: input,
+                createdAt: isoDate,
+                role: user.role as "customer",
+                name: user.name,
+                userId: user.id,
+              },
+            ]);
+            ws.send(
+              sendData({
+                event: "message",
+                data: {
+                  content: input,
+                  createdAt: isoDate,
+                  user: {
+                    id: user.id,
+                    name: user.name,
+                    role: user.role,
+                  },
+                },
+              }),
+            );
+
+            setInput("");
+          }
         }}
       >
         <Input

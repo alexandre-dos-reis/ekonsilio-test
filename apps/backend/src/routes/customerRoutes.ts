@@ -112,7 +112,7 @@ export const customerRoutes = new Hono<App>()
         .from(messages)
         .innerJoin(users, eq(users.id, messages.userId))
         .where(eq(messages.conversationId, convId))
-        .orderBy(desc(messages.createdAt)),
+        .orderBy(messages.createdAt),
     ]);
 
     if (!conv) {
