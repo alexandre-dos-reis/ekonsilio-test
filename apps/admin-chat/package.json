@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ek/env": "workspace:*",
     "@ek/auth": "workspace:*",
     "@ek/shared": "workspace:*",
     "@ek/ui": "workspace:*",

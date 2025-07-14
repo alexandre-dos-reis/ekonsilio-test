@@ -1,9 +1,0 @@
-import { createEnv } from "@ek/env";
-import { z } from "zod";
-
-export const env = createEnv({
-  runtimeEnv: import.meta.env,
-  emptyStringAsUndefined: true,
-  clientPrefix: "VITE_",
-  client: { VITE_BACKEND_URL: z.url() },
-});

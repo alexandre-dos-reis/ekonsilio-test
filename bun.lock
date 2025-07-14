@@ -14,7 +14,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@ek/auth": "workspace:*",
-        "@ek/env": "workspace:*",
         "@ek/shared": "workspace:*",
         "@ek/ui": "workspace:*",
         "@tailwindcss/vite": "^4.1.11",
@@ -48,13 +47,13 @@
       "dependencies": {
         "@ek/auth": "workspace:*",
         "@ek/db": "workspace:*",
-        "@ek/env": "workspace:*",
         "@ek/shared": "workspace:*",
         "@hono/node-server": "^1.15.0",
         "@hono/node-ws": "^1.2.0",
         "@hono/zod-validator": "^0.7.0",
+        "@t3-oss/env-core": "^0.13.8",
         "hono": "^4.8.5",
-        "zod": "^4.0.5",
+        "zod": "^4.0.2",
       },
       "devDependencies": {
         "@types/node": "^20.11.17",
@@ -65,7 +64,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@ek/auth": "workspace:*",
-        "@ek/env": "workspace:*",
         "@ek/shared": "workspace:*",
         "@ek/ui": "workspace:*",
         "@tailwindcss/vite": "^4.1.11",
@@ -113,13 +111,6 @@
       "devDependencies": {
         "@types/pg": "^8.15.4",
         "dotenv": "^17.2.0",
-      },
-    },
-    "packages/env": {
-      "name": "@ek/env",
-      "dependencies": {
-        "@t3-oss/env-core": "^0.13.8",
-        "zod": "^4.0.2",
       },
     },
     "packages/shared": {
@@ -230,8 +221,6 @@
     "@ek/backend": ["@ek/backend@workspace:apps/backend"],
 
     "@ek/db": ["@ek/db@workspace:packages/db"],
-
-    "@ek/env": ["@ek/env@workspace:packages/env"],
 
     "@ek/live-chat": ["@ek/live-chat@workspace:apps/live-chat"],
 

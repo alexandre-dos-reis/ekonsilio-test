@@ -4,13 +4,22 @@ import { env } from "./env";
 import { customerAuth, geniusAuth } from "./auth";
 import { cors } from "hono/cors";
 
+import { createNodeWebSocket } from "@hono/node-ws";
+
 import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 import type { App } from "./types";
-import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { customerRoutes } from "./routes/customerRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
 
-const app = new Hono<App>()
+const app = new Hono<App>();
+
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
+  app,
+});
+
+const broker = new PubSubBroker<SocketMessage>();
+
+const routes = app
   .use(
     "*",
     cors({
@@ -39,7 +48,41 @@ const app = new Hono<App>()
   })
   .route("/", geniusRoutes)
   .route("/", customerRoutes)
-  .route("/", chatRoutes);
+  .get(
+    "chat/:conversationId",
+    upgradeWebSocket((c) => {
+      const convId = c.req.param("conversationId");
+
+      return {
+        onOpen: (_, ws) => {
+          broker.subscribe(convId, ws);
+        },
+        onMessage: async (event, ws) => {
+          const wsData = getData(event.data.toString());
+
+          switch (wsData.event) {
+            case "message": {
+              const data = wsData.data;
+
+              await db.insert(messages).values({
+                content: data.content,
+                userId: data.user.id,
+                conversationId: convId,
+                createdAt: data.createdAt,
+              });
+            }
+          }
+
+          broker.publish(convId, wsData, ws);
+        },
+        onClose: (_, ws) => {
+          broker.unsubscribe(convId, ws);
+        },
+      };
+    }),
+  );
+
+export type Routes = typeof routes;
 
 const server = serve(
   {

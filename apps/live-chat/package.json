@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@ek/auth": "workspace:*",
-    "@ek/env": "workspace:*",
     "@ek/shared": "workspace:*",
     "@ek/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
