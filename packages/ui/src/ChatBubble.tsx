@@ -1,46 +1,50 @@
 import { cn } from "./cn";
 import { getRelativeTime } from "./func";
 
-export type Message = {
+export type Props = {
   content: string;
   createdAt: string;
-  user: { id: string; role: "genius" | "customer"; name: string };
+  userName: string;
+  areYouTheUser: boolean;
+  showDetails: boolean;
 };
 
 export const ChatBubble = ({
-  message: { createdAt, content, user },
-}: {
-  message: Message;
-}) => {
-  const isGenius = user.role === "genius";
-  const isUser = user.role === "customer";
+  createdAt,
+  userName,
+  areYouTheUser,
+  content,
+  showDetails,
+}: Props) => {
   return (
-    <div className={cn("chat", isGenius ? "chat-start" : "chat-end")}>
+    <div className={cn("chat", !areYouTheUser ? "chat-start" : "chat-end")}>
       <div className="chat-image avatar">
         <div className="w-10 rounded-full">
           <img
             alt="Tailwind CSS chat bubble component"
             src={
-              isGenius
+              areYouTheUser
                 ? "https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
                 : "https://img.daisyui.com/images/profile/demo/anakeen@192.webp"
             }
           />
         </div>
       </div>
-      <div className="chat-header">{user.name}</div>
+      <div className="chat-header">{userName}</div>
       <div
         className={cn(
           "chat-bubble",
-          isGenius ? "chat-bubble-accent" : "chat-bubble-info",
+          !areYouTheUser ? "chat-bubble-accent" : "chat-bubble-info",
         )}
       >
         {content}
       </div>
-      <time className="chat-footer text-xs opacity-50">
-        {isUser && "You, "}
-        {getRelativeTime(createdAt)}
-      </time>
+      {showDetails && (
+        <time className="chat-footer text-xs opacity-50">
+          {areYouTheUser && "You, "}
+          {getRelativeTime(createdAt)}
+        </time>
+      )}
     </div>
   );
 };

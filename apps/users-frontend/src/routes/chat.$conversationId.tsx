@@ -2,7 +2,7 @@ import { Alert, Button, ChatBubble, Input } from "@ek/ui";
 import { client, wsClient } from "@/utils/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { getData, sendData } from "@/utils/ws";
+import { getData, sendData } from "@ek/shared";
 import { useUserContext } from "@/contexts/user";
 import { formatISO } from "date-fns";
 
@@ -74,14 +74,14 @@ function RouteComponent() {
         </Alert>
       )}
       <div className="py-5 h-full">
-        {messages.map((m) => (
+        {messages.map((m, i) => (
           <ChatBubble
             key={m.id}
-            message={{
-              content: m.content,
-              createdAt: m.createdAt,
-              user: { id: m.userId, role: m.role, name: m.name },
-            }}
+            showDetails={messages.length === i + 1}
+            areYouTheUser={m.userId === user?.id}
+            userName={m.name}
+            content={m.content}
+            createdAt={m.createdAt}
           />
         ))}
       </div>

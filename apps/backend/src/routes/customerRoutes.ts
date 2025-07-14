@@ -32,24 +32,10 @@ export const customerRoutes = new Hono<App>()
     }
 
     try {
-      const subquery = db
-        .select()
-        .from(messages)
-        .orderBy(desc(messages.createdAt))
-        .as("firstMessage");
-
       const convs = await db
-        .select({
-          ...conversationCols,
-          firstMessage: {
-            id: subquery.id,
-            content: subquery.content,
-            createdAt: subquery.createdAt,
-          },
-        })
-        .from(conversations)
-        .innerJoin(subquery, eq(subquery.conversationId, conversations.id))
-        .where(eq(conversations.createdById, customer.id));
+        .selectDistinctOn([messages.conversationId])
+        .from(messages)
+        .where(eq(messages.userId, customer.id));
 
       return c.json(convs);
     } catch (e) {

@@ -64,11 +64,11 @@ function RouteComponent() {
               <li key={c.id}>
                 <Link
                   to="/chat/$conversationId"
-                  params={{ conversationId: c.id }}
+                  params={{ conversationId: c.conversationId }}
                   className="list-row bg-base-300 p-2 flex justify-between"
                 >
-                  <div>{c.firstMessage.content}</div>
-                  <div>{getRelativeTime(c.firstMessage.createdAt)}</div>
+                  <div>{c.content}</div>
+                  <div>{getRelativeTime(c.createdAt)}</div>
                 </Link>
               </li>
             );
