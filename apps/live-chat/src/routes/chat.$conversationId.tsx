@@ -39,19 +39,31 @@ function RouteComponent() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   const onMessage = useCallback((event: MessageEvent) => {
+    // console.log(event.data);
     const message = getData(event.data);
-    console.log(message);
-    // switch (message.event) {
-    //   case "message":
-    //     console.log(message.data.content, message.data.timestamp);
-    //     break;
-    //   case "join-conversation":
-    //     console.log(message.data.userName);
-    //     break;
-    //   case "quit-conversation":
-    //     console.log(message.data.userName);
-    //     break;
-    // }
+    // console.log(message);
+    // console.log(message);
+    switch (message.event) {
+      case "message":
+        setMessages((messages) => [
+          ...messages,
+          {
+            userId: message.data.user.id,
+            id: message.data.createdAt,
+            content: message.data.content,
+            name: message.data.user.name,
+            createdAt: message.data.createdAt,
+            role: message.data.user.role as "customer",
+          },
+        ]);
+        break;
+      case "join-conversation":
+        console.log(message.data.userName);
+        break;
+      case "quit-conversation":
+        console.log(message.data.userName);
+        break;
+    }
   }, []);
 
   useEffect(() => {

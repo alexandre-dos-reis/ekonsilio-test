@@ -10,6 +10,10 @@ import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 import type { App } from "./types";
 import { customerRoutes } from "./routes/customerRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
+import { PubSubBroker } from "./helper/PubSubBroker";
+import { getData, type SocketMessage } from "@ek/shared";
+import { db } from "./db";
+import { messages } from "@ek/db";
 
 const app = new Hono<App>();
 
@@ -63,10 +67,11 @@ const routes = app
           switch (wsData.event) {
             case "message": {
               const data = wsData.data;
+              const customer = c.get("customer");
 
               await db.insert(messages).values({
                 content: data.content,
-                userId: data.user.id,
+                userId: customer.id,
                 conversationId: convId,
                 createdAt: data.createdAt,
               });

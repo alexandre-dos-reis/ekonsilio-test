@@ -23,7 +23,7 @@ export class PubSubBroker<TData extends Record<any, any>> {
    * Store in a Map a conversationId => Conversation
    * Multiple participant to a conversation
    * */
-  private conversations = new Map<string, Conversation>();
+  conversations = new Map<string, Conversation>();
   /**
    * Store global subscribers
    * */
@@ -33,12 +33,20 @@ export class PubSubBroker<TData extends Record<any, any>> {
     private shouldForwardGlobally: GlobalForwardFilter = () => true,
   ) {}
 
-  subscribe(conv: string, ws: WS) {
+  subscribe(convId: string, ws: WS) {
     if (this.globalSubscriptions.has(ws)) {
       throw new Error("Socket is a global subscriber and cannot join rooms");
     }
-    let t = this.conversations.get(conv);
-    t?.subscriptions.add(ws);
+    let t = this.conversations.get(convId);
+    if (!t) {
+      this.conversations.set(convId, {
+        subscriptions: new Set([ws]),
+        state: { status: "init" },
+      });
+      return;
+    } else {
+      t?.subscriptions.add(ws);
+    }
   }
 
   unsubscribe(conv: string, ws: WS) {
@@ -81,17 +89,17 @@ export class PubSubBroker<TData extends Record<any, any>> {
     }
   }
 
-  publish(conv: string, data: TData, sender: WS) {
-    const t = this.conversations.get(conv);
+  publish(convId: string, data: TData, sender: WS) {
+    const t = this.conversations.get(convId);
     if (!t) return;
 
     // (1) send to the conversation
     this.fanOut(t.subscriptions, data, sender);
 
     // (2) send to global listeners
-    if (this.shouldForwardGlobally(conv, t.state, t.subscriptions)) {
-      this.fanOut(this.globalSubscriptions, data, sender);
-    }
+    // if (this.shouldForwardGlobally(convId, t.state, t.subscriptions)) {
+    //   this.fanOut(this.globalSubscriptions, data, sender);
+    // }
   }
 
   getConversationState(conv: string) {
