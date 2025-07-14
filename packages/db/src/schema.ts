@@ -6,9 +6,7 @@ import {
   timestamp,
   text,
   pgEnum,
-  jsonb,
 } from "drizzle-orm/pg-core";
-import type { Message } from "./types";
 
 const primaryKeyColumn = {
   id: uuid("id")
@@ -20,12 +18,15 @@ const timestampColumns = {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
-  }).defaultNow(),
+  })
+    .defaultNow()
+    .notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "string",
   })
     .defaultNow()
+    .notNull()
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   // https://github.com/drizzle-team/drizzle-orm/issues/956
 };
@@ -41,7 +42,7 @@ export const users = pgTable("users", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
-  role: userRoleEnum(),
+  role: userRoleEnum().notNull(),
 });
 
 export const sessions = pgTable("sessions", {
@@ -94,6 +95,11 @@ export const conversations = pgTable("conversations", {
   ...primaryKeyColumn,
   ...timestampColumns,
   status: statusConvEnum(),
+  createdById: uuid("created_by_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
 });
 
 export const messages = pgTable("messages", {

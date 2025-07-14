@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ek/types": "workspace:*",
     "@ek/auth": "workspace:*",
+    "@ek/types": "workspace:*",
     "@ek/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-router": "^1.125.6",

@@ -44,8 +44,8 @@ export const getAuth = (args: {
       additionalFields: {
         role: {
           type: "string",
-          required: false,
-          defaultValue: "user",
+          required: true,
+          defaultValue: args.role,
           input: false, // don't allow user to set role
         },
       },

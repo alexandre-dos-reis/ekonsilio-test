@@ -1,46 +1,22 @@
 import { Alert, Button, ChatBubble, Input, type Message } from "@ek/ui";
-import { client } from "@/utils/client";
+import { client, wsClient } from "@/utils/client";
 import {
   createFileRoute,
   type RegisteredRouter,
   type RouteById,
 } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import type { SocketMessage } from "@ek/types";
 
 export const Route = createFileRoute("/chat/$conversationId")({
   loader: async ({ params: { conversationId } }) => {
-    const res = await client.chat[":conversationId"].$get({
+    const res = await client.conversations[":conversationId"].$get({
       param: { conversationId },
     });
     return res.json();
   },
   component: RouteComponent,
 });
-
-function getMessages(
-  conversation: RouteById<
-    RegisteredRouter["routeTree"],
-    "/chat/$conversationId"
-  >["types"]["loaderData"],
-): Array<Message> {
-  if (!conversation) {
-    return [];
-  }
-
-  const customerMessages = conversation.customerMessages.map((m) => ({
-    ...m,
-    user: conversation.customer!,
-  }));
-
-  const geniusMessages = conversation.geniusMessages.map((m) => ({
-    ...m,
-    user: conversation.genius!,
-  }));
-
-  return [...customerMessages, ...geniusMessages].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
-}
 
 function RouteComponent() {
   const conversation = Route.useLoaderData();
@@ -50,35 +26,34 @@ function RouteComponent() {
     NonNullable<typeof conversation>["status"]
   >(conversation?.status || "init");
 
-  const [messages, setMessages] = useState<Array<Message>>(
-    getMessages(conversation),
-  );
+  const [messages, setMessages] = useState(conversation?.messages || []);
+  const [input, setInput] = useState("");
 
-  const ws = client.chat[":conversationId"].ws.$ws({
-    param: { conversationId },
-  });
+  const onMessage = useCallback((event: MessageEvent) => {
+    const message = event.data as SocketMessage;
+    console.log(message);
+    // switch (message.event) {
+    //   case "message":
+    //     console.log(message.data.content, message.data.timestamp);
+    //     break;
+    //   case "join-conversation":
+    //     console.log(message.data.userName);
+    //     break;
+    //   case "quit-conversation":
+    //     console.log(message.data.userName);
+    //     break;
+    // }
+  }, []);
 
   useEffect(() => {
-    ws.addEventListener("open", (event) => {
-      console.log("client open event");
-      // ws.send("client connected");
-    });
-    ws.addEventListener("message", (event) => {
-      console.log("client message event");
-      console.log(event.data);
-    });
-    ws.addEventListener("close", (event) => {
-      console.log("client close event");
-    });
-    ws.addEventListener("error", (event) => {
-      console.log("client error event");
+    const ws = wsClient.chat[":conversationId"].$ws({
+      param: { conversationId },
     });
 
+    ws.addEventListener("message", onMessage);
+
     return () => {
-      ws.removeEventListener("open", (event) => {});
-      ws.removeEventListener("message", (event) => {});
-      ws.removeEventListener("close", (event) => {});
-      ws.removeEventListener("error", (event) => {});
+      ws.removeEventListener("message", onMessage);
       ws.close();
     };
   }, []);
@@ -98,15 +73,29 @@ function RouteComponent() {
       <div className="py-5 h-full">
         {messages.map((m) => (
           <ChatBubble
-            key={`${m.timestamp}-${m.user.id}-${m.content}`}
-            message={m}
+            key={m.id}
+            message={{
+              content: m.content,
+              createdAt: m.createdAt,
+              user: { id: m.userId, role: m.role, name: m.name },
+            }}
           />
         ))}
       </div>
-      <Input label="Enter your message" />
-      <div className="flex justify-end">
-        <Button>Send your message</Button>
-      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <Input
+          label="Enter your message"
+          value={input}
+          onChange={(e) => setInput(e.currentTarget.value)}
+        />
+        <div className="flex justify-end">
+          <Button>Send your message</Button>
+        </div>
+      </form>
     </>
   );
 }

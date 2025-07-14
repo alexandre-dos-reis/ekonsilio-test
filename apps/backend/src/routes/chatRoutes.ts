@@ -3,15 +3,15 @@ import type { App } from "@/types";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
 
-export const chatRoutes = new Hono<App>().basePath("/chat");
+const routes = new Hono<App>().basePath("/chat");
 
 export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
-  app: chatRoutes,
+  app: routes,
 });
 
 const broker = new PubSubBroker();
 
-chatRoutes
+const chatRoutes = routes
   .get(
     "/",
     upgradeWebSocket((c) => {
@@ -47,3 +47,7 @@ chatRoutes
       };
     }),
   );
+
+export { chatRoutes };
+
+export type ChatRoutes = typeof chatRoutes;

@@ -3,12 +3,12 @@ import { getRelativeTime } from "./func";
 
 export type Message = {
   content: string;
-  timestamp: number;
+  createdAt: string;
   user: { id: string; role: "genius" | "customer"; name: string };
 };
 
 export const ChatBubble = ({
-  message: { timestamp, content, user },
+  message: { createdAt, content, user },
 }: {
   message: Message;
 }) => {
@@ -39,7 +39,7 @@ export const ChatBubble = ({
       </div>
       <time className="chat-footer text-xs opacity-50">
         {isUser && "You, "}
-        {getRelativeTime(timestamp)}
+        {getRelativeTime(createdAt)}
       </time>
     </div>
   );

@@ -1,13 +1,12 @@
 import { client } from "@/utils/client";
-import { getRelativeTime } from "@ek/ui";
-import { Button, Input } from "@ek/ui";
+import { Button, Input, getRelativeTime } from "@ek/ui";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const res = await client.chat.$get();
+    const res = await client.conversations.$get();
     return res.json();
   },
   component: RouteComponent,
@@ -32,7 +31,7 @@ function RouteComponent() {
       <Button
         onClick={async () => {
           if (firstMessage) {
-            const res = await client.chat.new.$post({
+            const res = await client.conversations.new.$post({
               json: {
                 messageContent: firstMessage,
                 messageTimestamp: Date.now(),
@@ -59,13 +58,8 @@ function RouteComponent() {
       <h2 className="text-2xl font-bold pb-5 py-10">Your past conversations</h2>
       <ul className="flex flex-gap flex-wrap gap-3 list">
         {pastConversations
-          .sort(
-            (a, b) =>
-              (b.customerMessages[0]?.timestamp || 0) -
-              (a.customerMessages[0]?.timestamp || 0),
-          )
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((c) => {
-            const firstMessage = c.customerMessages.at(0);
             return (
               <li key={c.id}>
                 <Link
@@ -73,8 +67,8 @@ function RouteComponent() {
                   params={{ conversationId: c.id }}
                   className="list-row bg-base-300 p-2 flex justify-between"
                 >
-                  <div>{firstMessage?.content}</div>
-                  <div>{getRelativeTime(firstMessage?.timestamp || 0)}</div>
+                  <div>{c.firstMessage.content}</div>
+                  <div>{getRelativeTime(c.firstMessage.createdAt)}</div>
                 </Link>
               </li>
             );
