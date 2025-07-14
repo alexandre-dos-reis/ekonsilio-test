@@ -23,7 +23,7 @@ export const ChatBubble = ({
           <img
             alt="Tailwind CSS chat bubble component"
             src={
-              areYouTheUser
+              !areYouTheUser
                 ? "https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
                 : "https://img.daisyui.com/images/profile/demo/anakeen@192.webp"
             }

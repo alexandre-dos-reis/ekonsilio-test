@@ -1,7 +1,7 @@
-import { Alert, Button, ChatBubble, Input } from "@ek/ui";
+import { Alert, Button, ChatBubble, cn, Input } from "@ek/ui";
 import { client, wsClient } from "@/utils/client";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { getData, sendData } from "@ek/shared";
 import { useUserContext } from "@/contexts/user";
 import { formatISO } from "date-fns";
@@ -36,6 +36,8 @@ function RouteComponent() {
     [],
   );
 
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+
   const onMessage = useCallback((event: MessageEvent) => {
     const message = getData(event.data);
     console.log(message);
@@ -61,6 +63,13 @@ function RouteComponent() {
     };
   }, []);
 
+  // Always scroll to bottom
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <>
       {status === "init" && (
@@ -73,7 +82,15 @@ function RouteComponent() {
           This conversation is closed, please open a new one.
         </Alert>
       )}
-      <div className="py-5 h-full">
+      <div
+        className={cn(
+          "py-5 overflow-y-scroll ",
+          status === "init" || status === "inactive"
+            ? "max-h-[calc(100vh-17rem)]"
+            : "max-h-[calc(100vh-14rem)]",
+        )}
+        ref={messagesRef}
+      >
         {messages.map((m, i) => (
           <ChatBubble
             key={m.id}
@@ -86,6 +103,7 @@ function RouteComponent() {
         ))}
       </div>
       <form
+        className="bg-base-100 h-[17rem]"
         onSubmit={(e) => {
           e.preventDefault();
           if (input && user) {

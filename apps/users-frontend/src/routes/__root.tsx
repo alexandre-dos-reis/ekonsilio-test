@@ -10,12 +10,12 @@ interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
-    <>
+    <div className="h-screen overflow-y-hidden">
       <Navbar />
-      <div className="max-w-xl mx-auto py-10">
+      <div className="max-w-xl mx-auto py-5 h-full relative">
         <Outlet />
       </div>
       <ToastContainer position="bottom-center" />
-    </>
+    </div>
   ),
 });

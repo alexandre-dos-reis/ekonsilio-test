@@ -4,7 +4,10 @@ import { cn } from "./cn";
 export const Alert = ({
   children,
   type = "info",
-}: PropsWithChildren<{ type?: "info" | "error" | "success" | "warning" }>) => (
+}: PropsWithChildren<{
+  type?: "info" | "error" | "success" | "warning";
+  className?: string;
+}>) => (
   <div
     role="alert"
     className={cn(
