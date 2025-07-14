@@ -1,5 +1,5 @@
 {
-  "name": "@ek/users-frontend",
+  "name": "@ek/admin-chat",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ek/env": "workspace:*",
     "@ek/auth": "workspace:*",
     "@ek/shared": "workspace:*",
     "@ek/ui": "workspace:*",

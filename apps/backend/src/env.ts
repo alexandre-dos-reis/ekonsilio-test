@@ -1,30 +1,22 @@
-import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
-
-const portSchema = (defaultPort: number = 3000) =>
-  z.preprocess(
-    (value) => Number(value),
-    z.number().gte(1000).lte(65535).default(defaultPort),
-  );
-
-const stringSchema = z.string().nonempty();
+import { createEnv, setPortSchema, stringSchema } from "@ek/env";
 
 export const env = createEnv({
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
   server: {
-    PORT: portSchema(3000),
+    PORT: setPortSchema(3000),
 
-    APP_CUSTOMER_TRUSTED_ORIGIN: z.url(),
+    CUSTOMER_TRUSTED_ORIGIN: z.url(),
     CUSTOMER_AUTH_SECRET: stringSchema.default("my-customer-auth-secret"),
 
-    APP_GENIUS_TRUSTED_ORIGIN: z.url(),
+    GENIUS_TRUSTED_ORIGIN: z.url(),
     GENIUS_AUTH_SECRET: stringSchema.default("my-genius-auth-secret"),
 
     POSTGRES_USER: stringSchema,
     POSTGRES_PASSWORD: stringSchema,
     POSTGRES_DB: stringSchema,
-    POSTGRES_PORT: portSchema(5432),
+    POSTGRES_PORT: setPortSchema(5432),
     POSTGRES_HOST: stringSchema.default("localhost"),
   },
 });

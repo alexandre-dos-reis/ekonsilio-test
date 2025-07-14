@@ -14,7 +14,7 @@ const app = new Hono<App>()
   .use(
     "*",
     cors({
-      origin: [env.APP_CUSTOMER_TRUSTED_ORIGIN, env.APP_GENIUS_TRUSTED_ORIGIN],
+      origin: [env.CUSTOMER_TRUSTED_ORIGIN, env.GENIUS_TRUSTED_ORIGIN],
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
