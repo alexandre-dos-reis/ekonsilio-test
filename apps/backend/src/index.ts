@@ -27,7 +27,7 @@ app
       origin: [env.CUSTOMER_TRUSTED_ORIGIN, env.GENIUS_TRUSTED_ORIGIN],
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
     }),
   )
   .use("*", async (c, next) => {
@@ -54,6 +54,7 @@ app
     upgradeWebSocket((c) => {
       const convId = c.req.param("conversationId");
       const customer = c.get("customer");
+      console.log(customer);
 
       return {
         onOpen: (_, ws) => {
@@ -65,7 +66,6 @@ app
           switch (wsData.event) {
             case "message": {
               const data = wsData.data;
-              console.log(customer);
 
               await db.insert(messages).values({
                 content: data.content,

@@ -23,6 +23,19 @@ export const customerRoutes = new Hono<App>()
       headers: c.req.raw.headers,
     });
 
+    if (!customerSession) {
+      return c.json({ error: "Unauthorized" }, 403);
+    }
+
+    c.set("customer", customerSession.user);
+
+    return next();
+  })
+  .use(async (c, next) => {
+    const customerSession = await customerAuth.api.getSession({
+      headers: c.req.raw.headers,
+    });
+
     c.set("customer", customerSession ? customerSession.user : null);
 
     return next();
