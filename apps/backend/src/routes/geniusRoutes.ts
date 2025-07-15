@@ -38,7 +38,7 @@ export const geniusRoutes = new Hono<{
   .get("/conversations/:id", async (c) => {
     const convId = c.req.param("id");
 
-    const [[conv], msgs] = await Promise.all([
+    let [[conv], msgs] = await Promise.all([
       db
         .select(conversationCols)
         .from(conversations)
@@ -58,6 +58,11 @@ export const geniusRoutes = new Hono<{
 
     if (!conv) {
       return c.json(null);
+    }
+
+    if (conv.status === "init") {
+      await db.update(conversations).set({ status: "active" });
+      conv.status = "active";
     }
 
     return c.json({ ...conv, messages: msgs });
