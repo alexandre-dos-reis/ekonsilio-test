@@ -8,6 +8,6 @@ export const router = createRouter({
   defaultPreload: "intent",
   scrollRestoration: true,
   context: {
-    auth: { user: null, setUser: () => null },
+    auth: { user: null, setUser: () => null, isLoading: true },
   },
 });
