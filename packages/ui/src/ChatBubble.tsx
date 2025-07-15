@@ -1,3 +1,4 @@
+import { AnimatePing } from "./AnimatePing";
 import { cn } from "./cn";
 import { getRelativeTime } from "./func";
 
@@ -7,6 +8,8 @@ export type Props = {
   userName: string;
   areYouTheUser: boolean;
   showDetails: boolean;
+  picture: "kenobee" | "anakeen";
+  isOnline?: boolean;
 };
 
 export const ChatBubble = ({
@@ -15,22 +18,20 @@ export const ChatBubble = ({
   areYouTheUser,
   content,
   showDetails,
+  picture,
+  isOnline,
 }: Props) => {
   return (
     <div className={cn("chat", !areYouTheUser ? "chat-start" : "chat-end")}>
-      <div className="chat-image avatar">
-        <div className="w-10 rounded-full">
+      <div className={cn("chat-image avatar", isOnline && "avatar-online")}>
+        <div className="w-10 rounded-full ">
           <img
             alt="Tailwind CSS chat bubble component"
-            src={
-              !areYouTheUser
-                ? "https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
-                : "https://img.daisyui.com/images/profile/demo/anakeen@192.webp"
-            }
+            src={`https://img.daisyui.com/images/profile/demo/${picture}@192.webp`}
           />
         </div>
       </div>
-      <div className="chat-header">{userName}</div>
+      <div className="chat-header relative">{userName}</div>
       <div
         className={cn(
           "chat-bubble",

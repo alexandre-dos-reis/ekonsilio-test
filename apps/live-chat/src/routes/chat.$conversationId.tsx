@@ -28,6 +28,7 @@ function RouteComponent() {
   const conversation = Route.useLoaderData();
   const { conversationId } = Route.useParams();
   const { user } = useUserContext();
+  const [isUserOnline, setIsUserOnline] = useState(false);
 
   const [status, setStatus] = useState<
     NonNullable<typeof conversation>["status"]
@@ -63,6 +64,7 @@ function RouteComponent() {
         ]);
         break;
       case "join-conversation":
+        setIsUserOnline(true);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
@@ -71,6 +73,7 @@ function RouteComponent() {
         });
         break;
       case "quit-conversation":
+        setIsUserOnline(false);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
@@ -109,13 +112,13 @@ function RouteComponent() {
         </Alert>
       )}
       <div
+        ref={messagesRef}
         className={cn(
           "py-5 overflow-y-scroll ",
           status === "init" || status === "inactive"
             ? "max-h-[calc(100vh-17rem)]"
             : "max-h-[calc(100vh-14rem)]",
         )}
-        ref={messagesRef}
       >
         {messages.map((m, i) => (
           <ChatBubble
@@ -125,6 +128,8 @@ function RouteComponent() {
             userName={m.name}
             content={m.content}
             createdAt={m.createdAt}
+            picture={m.userId === user?.id ? "anakeen" : "kenobee"}
+            isOnline={m.userId !== user?.id && isUserOnline}
           />
         ))}
       </div>

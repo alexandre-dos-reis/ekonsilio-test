@@ -12,12 +12,12 @@ import z from "zod";
 import { Hono } from "hono";
 import { customerAuth } from "@/auth";
 
-const conversationCols = (() => {
+export const conversationCols = (() => {
   const { id, status, createdAt } = getTableColumns(conversations);
   return { id, status, createdAt };
 })();
 
-const messageCols = (() => {
+export const messageCols = (() => {
   const { id, userId, content, createdAt } = getTableColumns(messages);
   return { id, userId, content, createdAt };
 })();
@@ -127,9 +127,7 @@ export const customerRoutes = new Hono<{
       return c.json(null);
     }
 
-    const res = { ...conv, messages: msgs };
-
-    return c.json(res);
+    return c.json({ ...conv, messages: msgs });
   });
 
 export type CustomerRoutes = typeof customerRoutes;

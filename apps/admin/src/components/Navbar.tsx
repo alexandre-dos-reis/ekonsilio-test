@@ -17,7 +17,7 @@ const AuthSection = () => {
         <div className="w-10 rounded-full">
           <img
             alt="Tailwind CSS Navbar component"
-            src="https://img.daisyui.com/images/profile/demo/anakeen@192.webp"
+            src="https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
           />
         </div>
       </div>

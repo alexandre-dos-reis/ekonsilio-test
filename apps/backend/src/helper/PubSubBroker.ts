@@ -2,7 +2,7 @@ import type { WSContext } from "hono/ws";
 
 export type WS = WSContext<WebSocket>;
 
-export type GlobalForwardFilter = (topic: string, subs: Set<WS>) => boolean;
+// export type GlobalForwardFilter = (topic: string, subs: Set<WS>) => boolean;
 
 type Conversations<TState extends Record<any, any>> = Map<
   string,
@@ -26,9 +26,9 @@ export class PubSubBroker<
    * */
   private globalSubscriptions = new Set<WS>(); // sockets that hear ALL rooms
 
-  constructor(
-    private shouldForwardGlobally: GlobalForwardFilter = () => true,
-  ) {}
+  // constructor(
+  //   private shouldForwardGlobally: GlobalForwardFilter = () => true,
+  // ) {}
 
   subscribe(convId: string, ws: WS, initState?: TState) {
     let conversation = this.conversations.get(convId);
@@ -75,10 +75,10 @@ export class PubSubBroker<
     // Send to the conversation
     this.send(conversation.subscriptions, payload, sender);
 
-    // Send Globally it filters returns true
-    if (this.shouldForwardGlobally(convId, conversation.subscriptions)) {
-      this.send(this.globalSubscriptions, payload, sender);
-    }
+    // // Send Globally it filters returns true
+    // if (this.shouldForwardGlobally(convId, conversation.subscriptions)) {
+    //   this.send(this.globalSubscriptions, payload, sender);
+    // }
   }
 
   getConversations() {
