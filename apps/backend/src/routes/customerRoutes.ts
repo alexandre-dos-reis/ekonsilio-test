@@ -1,8 +1,14 @@
 import { zValidator } from "@hono/zod-validator";
 import { db } from "../db";
-import { conversations, messages, eq, getTableColumns, users } from "@ek/db";
+import {
+  conversations,
+  messages,
+  eq,
+  getTableColumns,
+  users,
+  and,
+} from "@ek/db";
 import z from "zod";
-import type { App } from "@/types";
 import { Hono } from "hono";
 import { customerAuth } from "@/auth";
 
@@ -16,7 +22,11 @@ const messageCols = (() => {
   return { id, userId, content, createdAt };
 })();
 
-export const customerRoutes = new Hono<App>()
+export const customerRoutes = new Hono<{
+  Variables: {
+    customer: (typeof customerAuth)["$Infer"]["Session"]["user"];
+  };
+}>()
   .basePath("/customers")
   .use(async (c, next) => {
     const customerSession = await customerAuth.api.getSession({
@@ -88,12 +98,18 @@ export const customerRoutes = new Hono<App>()
   )
   .get("/conversations/:id", async (c) => {
     const convId = c.req.param("id");
+    const customer = c.get("customer");
 
     const [[conv], msgs] = await Promise.all([
       db
         .select(conversationCols)
         .from(conversations)
-        .where(eq(conversations.id, convId)),
+        .where(
+          and(
+            eq(conversations.id, convId),
+            eq(conversations.createdById, customer.id),
+          ),
+        ),
       db
         .select({
           ...messageCols,

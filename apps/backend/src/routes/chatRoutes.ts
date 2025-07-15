@@ -1,5 +1,6 @@
 import { customerAuth, geniusAuth } from "@/auth";
 import { db } from "@/db";
+import { sendNewConversationsToGenius } from "@/helper/chat";
 import { PubSubBroker } from "@/helper/PubSubBroker";
 import { conversations, messages, eq } from "@ek/db";
 import { getData, type SocketMessage } from "@ek/shared";
@@ -13,7 +14,7 @@ const chatRoutes = new Hono<{
     user: User;
   };
 }>().basePath("/chat");
-const broker = new PubSubBroker<SocketMessage>();
+const broker = new PubSubBroker<SocketMessage, { status: string }>();
 
 export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
   app: chatRoutes,
@@ -37,18 +38,33 @@ const routes = chatRoutes
     return next();
   })
   .get(
+    "/",
+    upgradeWebSocket(async (c) => {
+      return {
+        onOpen: async (_, ws) => {
+          broker.subscribeAll(ws);
+
+          await sendNewConversationsToGenius(broker, [ws]);
+        },
+        onClose: async (_, ws) => {
+          broker.unsubscribeAll(ws);
+        },
+      };
+    }),
+  )
+  .get(
     "/:conversationId",
     upgradeWebSocket(async (c) => {
+      const user = c.get("user") as User;
       const convId = c.req.param("conversationId");
       const [conv] = await db
         .select()
         .from(conversations)
         .where(eq(conversations.id, convId));
-      const user = c.get("user") as User;
 
       return {
         onOpen: async (_, ws) => {
-          broker.subscribe(convId, ws);
+          broker.subscribe(convId, ws, { status: conv.status || "init" });
 
           let status = conv.status;
 
@@ -68,6 +84,8 @@ const routes = chatRoutes
             },
             ws,
           );
+
+          await sendNewConversationsToGenius(broker);
         },
         onMessage: async (event, ws) => {
           const wsData = getData(event.data.toString());
@@ -87,7 +105,7 @@ const routes = chatRoutes
 
           broker.publish(convId, wsData, ws);
         },
-        onClose: (_, ws) => {
+        onClose: async (_, ws) => {
           broker.publish(
             convId,
             {
@@ -97,6 +115,7 @@ const routes = chatRoutes
             ws,
           );
           broker.unsubscribe(convId, ws);
+          await sendNewConversationsToGenius(broker);
         },
       };
     }),

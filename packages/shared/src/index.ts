@@ -22,6 +22,17 @@ export type SocketMessage =
   | {
       event: "quit-conversation";
       data: { userName: string; conversationStatus?: StatusConv };
+    }
+  | {
+      event: "conversations-waiting-for-genius";
+      data: {
+        convs: Array<{
+          id: string;
+          userName: string;
+          createdAt: string;
+          content: string;
+        }>;
+      };
     };
 
 export const getData = (rawData: any) => {

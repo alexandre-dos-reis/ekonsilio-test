@@ -1,5 +1,5 @@
 {
-  "name": "admin",
+  "name": "@ek/admin",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,15 +17,15 @@
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-router": "^1.121.2",
     "@tanstack/router-plugin": "^1.121.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitejs/plugin-react-swc": "^3.10.2",
     "jsdom": "^26.0.0",

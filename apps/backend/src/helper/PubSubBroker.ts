@@ -1,20 +1,26 @@
-import type { conversations } from "@ek/db";
 import type { WSContext } from "hono/ws";
 
-export interface ConversationState {
-  status: (typeof conversations)["$inferSelect"]["status"];
-}
-
-type WS = WSContext<WebSocket>;
+export type WS = WSContext<WebSocket>;
 
 export type GlobalForwardFilter = (topic: string, subs: Set<WS>) => boolean;
 
-export class PubSubBroker<TData extends Record<any, any>> {
+type Conversations<TState extends Record<any, any>> = Map<
+  string,
+  { subscriptions: Set<WS>; state: TState }
+>;
+
+export class PubSubBroker<
+  TPayload extends Record<any, any>,
+  TState extends Record<any, any>,
+> {
   /**
    * Store in a Map a conversationId => Set of websockets
    * Multiple participant to a conversation
    * */
-  private conversations = new Map<string, Set<WS>>();
+  private conversations: Conversations<TState> = new Map<
+    string,
+    { subscriptions: Set<WS>; state: TState }
+  >();
   /**
    * Store global subscribers
    * */
@@ -24,19 +30,23 @@ export class PubSubBroker<TData extends Record<any, any>> {
     private shouldForwardGlobally: GlobalForwardFilter = () => true,
   ) {}
 
-  subscribe(convId: string, ws: WS) {
+  subscribe(convId: string, ws: WS, initState?: TState) {
     let conversation = this.conversations.get(convId);
 
     if (!conversation) {
-      this.conversations.set(convId, new Set([ws]));
+      this.conversations.set(convId, {
+        subscriptions: new Set([ws]),
+        state: initState || ({} as TState),
+      });
     } else {
-      conversation.add(ws);
+      conversation.subscriptions.add(ws);
     }
   }
 
   unsubscribe(conv: string, ws: WS) {
-    this.conversations.get(conv)?.delete(ws);
-    if (this.conversations.get(conv)?.size === 0) {
+    this.conversations.get(conv)?.subscriptions.delete(ws);
+
+    if (this.conversations.get(conv)?.subscriptions.size === 0) {
       this.conversations.delete(conv);
     }
   }
@@ -49,25 +59,33 @@ export class PubSubBroker<TData extends Record<any, any>> {
     this.globalSubscriptions.delete(ws);
   }
 
-  private send(targets: Set<WS>, data: TData, sender: WS) {
+  private send(targets: Set<WS>, payload: TPayload, sender: WS) {
     for (const sock of targets) {
       if (sock === sender || sock.readyState !== sock.raw?.OPEN) {
         continue;
       }
-      sock.send(JSON.stringify(data));
+      sock.send(JSON.stringify(payload));
     }
   }
 
-  publish(convId: string, data: TData, sender: WS) {
+  publish(convId: string, payload: TPayload, sender: WS) {
     const conversation = this.conversations.get(convId);
     if (!conversation) return;
 
     // Send to the conversation
-    this.send(conversation, data, sender);
+    this.send(conversation.subscriptions, payload, sender);
 
     // Send Globally it filters returns true
-    if (this.shouldForwardGlobally(convId, conversation)) {
-      this.send(this.globalSubscriptions, data, sender);
+    if (this.shouldForwardGlobally(convId, conversation.subscriptions)) {
+      this.send(this.globalSubscriptions, payload, sender);
     }
+  }
+
+  getConversations() {
+    return this.conversations;
+  }
+
+  getGlobalSubscribers() {
+    return Array.from(this.globalSubscriptions);
   }
 }

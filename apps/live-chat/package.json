@@ -1,7 +1,6 @@
 {
   "name": "@ek/live-chat",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

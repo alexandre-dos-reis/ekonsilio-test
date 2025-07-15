@@ -4,16 +4,12 @@ import { env } from "./env";
 import { customerAuth, geniusAuth } from "./auth";
 import { cors } from "hono/cors";
 import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
-import type { App } from "./types";
 import { customerRoutes } from "./routes/customerRoutes";
 import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
 
-const app = new Hono<App>();
-
-app
+const app = new Hono()
   .use(
-    "*",
     cors({
       origin: [env.CUSTOMER_TRUSTED_ORIGIN, env.GENIUS_TRUSTED_ORIGIN],
       credentials: true,
