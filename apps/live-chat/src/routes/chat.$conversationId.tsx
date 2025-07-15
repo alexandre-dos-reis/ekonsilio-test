@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { getData, sendData } from "@ek/shared";
 import { useUserContext } from "@/contexts/user";
 import { formatISO } from "date-fns";
+import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/chat/$conversationId")({
   loader: async ({ params: { conversationId } }) => {
@@ -39,10 +40,7 @@ function RouteComponent() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   const onMessage = useCallback((event: MessageEvent) => {
-    // console.log(event.data);
     const message = getData(event.data);
-    // console.log(message);
-    // console.log(message);
     switch (message.event) {
       case "message":
         setMessages((messages) => [
@@ -58,10 +56,20 @@ function RouteComponent() {
         ]);
         break;
       case "join-conversation":
-        console.log(message.data.userName);
+        if (message.data.conversationStatus) {
+          setStatus(message.data.conversationStatus);
+        }
+        toast(`${message.data.userName} has join the conversation !`, {
+          type: "info",
+        });
         break;
       case "quit-conversation":
-        console.log(message.data.userName);
+        if (message.data.conversationStatus) {
+          setStatus(message.data.conversationStatus);
+        }
+        toast(`${message.data.userName} has left the conversation !`, {
+          type: "info",
+        });
         break;
     }
   }, []);

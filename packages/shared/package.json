@@ -4,5 +4,8 @@
     ".": "./src/index.ts"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@ek/db": "workspace:*"
+  }
 }

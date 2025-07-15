@@ -9,7 +9,11 @@ export const geniusRoutes = new Hono<App>()
       headers: c.req.raw.headers,
     });
 
-    c.set("genius", geniusSession ? geniusSession.user : null);
+    if (!geniusSession) {
+      return c.json({ error: "Unauthorized" }, 403);
+    }
+
+    c.set("customer", geniusSession.user);
 
     return next();
   })

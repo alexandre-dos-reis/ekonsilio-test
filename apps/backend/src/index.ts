@@ -6,19 +6,9 @@ import { cors } from "hono/cors";
 import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 import type { App } from "./types";
 import { customerRoutes } from "./routes/customerRoutes";
-import { createNodeWebSocket } from "@hono/node-ws";
-import { PubSubBroker } from "./helper/PubSubBroker";
-import { getData, type SocketMessage } from "@ek/shared";
-import { messages } from "@ek/db";
-import { db } from "./db";
+import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 
 const app = new Hono<App>();
-
-export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
-  app,
-});
-
-const broker = new PubSubBroker<SocketMessage>();
 
 app
   .use(
@@ -30,60 +20,14 @@ app
       allowMethods: ["GET", "POST", "OPTIONS"],
     }),
   )
-  .use("*", async (c, next) => {
-    const [customerSession, geniusSession] = await Promise.all([
-      customerAuth.api.getSession({ headers: c.req.raw.headers }),
-      geniusAuth.api.getSession({ headers: c.req.raw.headers }),
-    ]);
-
-    c.set("customer", customerSession ? customerSession.user : null);
-    c.set("genius", geniusSession ? geniusSession.user : null);
-
-    return next();
-  })
   .on(["POST", "GET"], `${customerAuthBasePath}/**`, (c) => {
     return customerAuth.handler(c.req.raw);
   })
   .on(["POST", "GET"], `${geniusAuthBasePath}/**`, (c) => {
     return geniusAuth.handler(c.req.raw);
   })
-  // .route("/", geniusRoutes)
-  .route("/", customerRoutes)
-  .get(
-    "chat/:conversationId",
-    upgradeWebSocket((c) => {
-      const convId = c.req.param("conversationId");
-      const customer = c.get("customer");
-      console.log(customer);
-
-      return {
-        onOpen: (_, ws) => {
-          broker.subscribe(convId, ws);
-        },
-        onMessage: async (event, ws) => {
-          const wsData = getData(event.data.toString());
-
-          switch (wsData.event) {
-            case "message": {
-              const data = wsData.data;
-
-              await db.insert(messages).values({
-                content: data.content,
-                userId: customer.id,
-                conversationId: convId,
-                createdAt: data.createdAt,
-              });
-            }
-          }
-
-          broker.publish(convId, wsData, ws);
-        },
-        onClose: (_, ws) => {
-          broker.unsubscribe(convId, ws);
-        },
-      };
-    }),
-  );
+  .route("/", chatRoutes)
+  .route("/", customerRoutes);
 
 const server = serve(
   {

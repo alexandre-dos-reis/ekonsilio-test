@@ -1,3 +1,5 @@
+import type { UserRole, StatusConv } from "@ek/db/types";
+
 export type SocketMessage =
   | {
       event: "message";
@@ -6,18 +8,18 @@ export type SocketMessage =
         createdAt: string;
         user: {
           id: string;
-          role: string;
+          role: UserRole;
           name: string;
         };
       };
     }
   | {
       event: "join-conversation";
-      data: { userName: string };
+      data: { userName: string; conversationStatus?: StatusConv };
     }
   | {
       event: "quit-conversation";
-      data: { userName: string };
+      data: { userName: string; conversationStatus?: StatusConv };
     };
 
 export const getData = (rawData: any) => {
