@@ -2,8 +2,6 @@ import type { WSContext } from "hono/ws";
 
 export type WS = WSContext<WebSocket>;
 
-// export type GlobalForwardFilter = (topic: string, subs: Set<WS>) => boolean;
-
 type Conversations<TState extends Record<any, any>> = Map<
   string,
   { subscriptions: Set<WS>; state: TState }
@@ -13,22 +11,10 @@ export class PubSubBroker<
   TPayload extends Record<any, any>,
   TState extends Record<any, any>,
 > {
-  /**
-   * Store in a Map a conversationId => Set of websockets
-   * Multiple participant to a conversation
-   * */
   private conversations: Conversations<TState> = new Map<
-    string,
+    string, //conversationId
     { subscriptions: Set<WS>; state: TState }
   >();
-  /**
-   * Store global subscribers
-   * */
-  private globalSubscriptions = new Set<WS>(); // sockets that hear ALL rooms
-
-  // constructor(
-  //   private shouldForwardGlobally: GlobalForwardFilter = () => true,
-  // ) {}
 
   subscribe(convId: string, ws: WS, initState?: TState) {
     let conversation = this.conversations.get(convId);
@@ -51,41 +37,22 @@ export class PubSubBroker<
     }
   }
 
-  subscribeAll(ws: WS) {
-    this.globalSubscriptions.add(ws);
-  }
-
-  unsubscribeAll(ws: WS) {
-    this.globalSubscriptions.delete(ws);
-  }
-
-  private send(targets: Set<WS>, payload: TPayload, sender: WS) {
-    for (const sock of targets) {
-      if (sock === sender || sock.readyState !== sock.raw?.OPEN) {
-        continue;
-      }
-      sock.send(JSON.stringify(payload));
-    }
-  }
-
-  publish(convId: string, payload: TPayload, sender: WS) {
+  publish(convId: string, payload: TPayload, sender?: WS) {
     const conversation = this.conversations.get(convId);
     if (!conversation) return;
 
-    // Send to the conversation
-    this.send(conversation.subscriptions, payload, sender);
-
-    // // Send Globally it filters returns true
-    // if (this.shouldForwardGlobally(convId, conversation.subscriptions)) {
-    //   this.send(this.globalSubscriptions, payload, sender);
-    // }
+    for (const socket of conversation.subscriptions) {
+      if (socket === sender || socket.readyState !== socket.raw?.OPEN) {
+        continue;
+      }
+      socket.send(JSON.stringify(payload));
+    }
   }
 
   getConversations() {
-    return this.conversations;
-  }
-
-  getGlobalSubscribers() {
-    return Array.from(this.globalSubscriptions);
+    return Array.from(this.conversations).map(([convId, conversation]) => ({
+      ...conversation,
+      id: convId,
+    }));
   }
 }

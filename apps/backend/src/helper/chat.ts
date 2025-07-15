@@ -1,17 +1,15 @@
 import { db } from "@/db";
 import { conversations, messages, eq, inArray, users } from "@ek/db";
-import { sendData, type SocketMessage } from "@ek/shared";
-import type { PubSubBroker, WS } from "./PubSubBroker";
+import { type SocketMessage } from "@ek/shared";
+import type { PubSubBroker } from "./PubSubBroker";
+import { GENIUS_WAITING_ROOM } from "@/routes/chatRoutes";
 
-export const sendNewConversationsToGenius = async (
+export const publishNewConversationsToGenius = async (
   broker: PubSubBroker<SocketMessage, { status: string }>,
-  sendTo?: Array<WS>,
 ) => {
-  const convsWithInitStatus = Array.from(
-    broker.getConversations(),
-    ([id, value]) => ({ ...value.state, id }),
-  )
-    .filter((c) => c.status === "init")
+  const convsWithInitStatus = broker
+    .getConversations()
+    .filter((c) => c.state.status === "init")
     .map((c) => c.id);
 
   const subquery = db
@@ -26,19 +24,15 @@ export const sendNewConversationsToGenius = async (
     .innerJoin(subquery, eq(subquery.conversationId, conversations.id))
     .where(inArray(conversations.id, convsWithInitStatus));
 
-  (sendTo || broker.getGlobalSubscribers()).map((ws) => {
-    ws.send(
-      sendData({
-        event: "conversations-waiting-for-genius",
-        data: {
-          convs: convs.map((c) => ({
-            id: c.conversations.id,
-            content: c.messages.content,
-            createdAt: c.messages.createdAt,
-            userName: c.users.name,
-          })),
-        },
-      }),
-    );
+  broker.publish(GENIUS_WAITING_ROOM, {
+    event: "conversations-waiting-for-genius",
+    data: {
+      convs: convs.map((c) => ({
+        id: c.conversations.id,
+        content: c.messages.content,
+        createdAt: c.messages.createdAt,
+        userName: c.users.name,
+      })),
+    },
   });
 };

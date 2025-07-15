@@ -1,6 +1,6 @@
 import { customerAuth, geniusAuth } from "@/auth";
 import { db } from "@/db";
-import { sendNewConversationsToGenius } from "@/helper/chat";
+import { publishNewConversationsToGenius } from "@/helper/chat";
 import { PubSubBroker } from "@/helper/PubSubBroker";
 import { conversations, messages, eq } from "@ek/db";
 import { getData, type SocketMessage } from "@ek/shared";
@@ -8,6 +8,8 @@ import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
 
 type User = (typeof customerAuth)["$Infer"]["Session"]["user"];
+
+export const GENIUS_WAITING_ROOM = "GENIUS_WAITING_ROOM";
 
 const chatRoutes = new Hono<{
   Variables: {
@@ -22,32 +24,37 @@ export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
 
 const routes = chatRoutes
   .use(async (c, next) => {
-    const [customerSession, geniusSession] = await Promise.all([
-      customerAuth.api.getSession({ headers: c.req.raw.headers }),
-      geniusAuth.api.getSession({ headers: c.req.raw.headers }),
-    ]);
+    const customerSession = await customerAuth.api.getSession({
+      headers: c.req.raw.headers,
+    });
 
-    const user = customerSession?.user || geniusSession?.user || null;
-
-    if (!user) {
-      return c.json({ error: "Unauthorized" }, 403);
+    if (customerSession) {
+      c.set("user", customerSession?.user || null);
+      return next();
     }
 
-    c.set("user", user);
+    const geniusSession = await geniusAuth.api.getSession({
+      headers: c.req.raw.headers,
+    });
 
-    return next();
+    if (geniusSession) {
+      c.set("user", geniusSession?.user || null);
+      return next();
+    }
+
+    return c.json(null, 403);
   })
   .get(
     "/",
     upgradeWebSocket(async (c) => {
       return {
         onOpen: async (_, ws) => {
-          broker.subscribeAll(ws);
+          broker.subscribe(GENIUS_WAITING_ROOM, ws);
 
-          await sendNewConversationsToGenius(broker, [ws]);
+          await publishNewConversationsToGenius(broker);
         },
         onClose: async (_, ws) => {
-          broker.unsubscribeAll(ws);
+          broker.unsubscribe(GENIUS_WAITING_ROOM, ws);
         },
       };
     }),
@@ -55,22 +62,26 @@ const routes = chatRoutes
   .get(
     "/:conversationId",
     upgradeWebSocket(async (c) => {
-      const user = c.get("user") as User;
       const convId = c.req.param("conversationId");
-      const [conv] = await db
-        .select()
-        .from(conversations)
-        .where(eq(conversations.id, convId));
+      const user = c.get("user") as User;
 
       return {
         onOpen: async (_, ws) => {
+          let [conv] = await db
+            .select()
+            .from(conversations)
+            .where(eq(conversations.id, convId));
+
           broker.subscribe(convId, ws, { status: conv.status || "init" });
 
-          let status = conv.status;
-
-          if (user.role === "genius" && status === "init") {
-            await db.update(conversations).set({ status: "active" });
-            status = "active";
+          if (user.role === "genius" && conv.status === "init") {
+            conv = (
+              await db
+                .update(conversations)
+                .set({ status: "active" })
+                .where(eq(conversations.id, convId))
+                .returning()
+            ).at(0)!;
           }
 
           broker.publish(
@@ -79,13 +90,13 @@ const routes = chatRoutes
               event: "join-conversation",
               data: {
                 userName: user.name,
-                conversationStatus: status ?? undefined,
+                conversationStatus: conv.status ?? undefined,
               },
             },
             ws,
           );
 
-          await sendNewConversationsToGenius(broker);
+          await publishNewConversationsToGenius(broker);
         },
         onMessage: async (event, ws) => {
           const wsData = getData(event.data.toString());
@@ -115,7 +126,7 @@ const routes = chatRoutes
             ws,
           );
           broker.unsubscribe(convId, ws);
-          await sendNewConversationsToGenius(broker);
+          await publishNewConversationsToGenius(broker);
         },
       };
     }),
