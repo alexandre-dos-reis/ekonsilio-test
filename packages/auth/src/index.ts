@@ -52,6 +52,7 @@ export const getAuth = (args: {
     },
     advanced: {
       database: { generateId: false },
+      cookiePrefix: args.role,
     },
   });
 
