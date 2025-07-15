@@ -17,5 +17,8 @@
     "@total-typescript/tsconfig": "^1.0.4",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "hono": "^4.8.5"
   }
 }

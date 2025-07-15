@@ -3,9 +3,12 @@ import { UserContextProvider, useUserContext } from "./contexts/user";
 import { router } from "./router";
 
 const InnerApp = () => {
-  const { setUser, user } = useUserContext();
+  const { setUser, user, isLoading } = useUserContext();
   return (
-    <RouterProvider router={router} context={{ auth: { user, setUser } }} />
+    <RouterProvider
+      router={router}
+      context={{ auth: { user, setUser, isLoading } }}
+    />
   );
 };
 

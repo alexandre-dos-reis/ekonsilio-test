@@ -1,10 +1,22 @@
 import { client } from "@/utils/client";
 import { Button, Input, getRelativeTime } from "@ek/ui";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.user) {
+      throw redirect({
+        to: "/signin",
+      });
+    }
+  },
   loader: async () => {
     const res = await client.conversations.$get();
     return res.json();
@@ -22,19 +34,16 @@ function RouteComponent() {
   }
 
   return (
-    <>
+    <div>
       <h2 className="text-2xl font-bold">Start a new conversation</h2>
-      <Input
-        value={firstMessage}
-        onChange={(e) => setFirstMessage(e.target.value)}
-      />
-      <Button
-        onClick={async () => {
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+
           if (firstMessage) {
             const res = await client.conversations.new.$post({
               json: {
                 messageContent: firstMessage,
-                messageTimestamp: Date.now(),
               },
             });
 
@@ -53,10 +62,14 @@ function RouteComponent() {
           }
         }}
       >
-        Send your first message
-      </Button>
+        <Input
+          value={firstMessage}
+          onChange={(e) => setFirstMessage(e.target.value)}
+        />
+        <Button>Send your first message</Button>
+      </form>
       <h2 className="text-2xl font-bold pb-5 py-10">Your past conversations</h2>
-      <ul className="flex flex-gap flex-wrap gap-3 list">
+      <ul className="grid grid-cols-2 gap-2">
         {pastConversations
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((c) => {
@@ -65,15 +78,17 @@ function RouteComponent() {
                 <Link
                   to="/chat/$conversationId"
                   params={{ conversationId: c.conversationId }}
-                  className="list-row bg-base-300 p-2 flex justify-between"
+                  className="bg-base-300 flex justify-between items-center px-2 py-1"
                 >
                   <div>{c.content}</div>
-                  <div>{getRelativeTime(c.createdAt)}</div>
+                  <div className="text-xs text-neutral-500">
+                    {getRelativeTime(c.createdAt)}
+                  </div>
                 </Link>
               </li>
             );
           })}
       </ul>
-    </>
+    </div>
   );
 }

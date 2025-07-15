@@ -11,11 +11,13 @@ import type { User } from "@ek/auth";
 export type UserContextType = {
   user: User;
   setUser: (user: User) => void;
+  isLoading: boolean;
 };
 
 const UserContext = createContext<UserContextType>({
   user: null,
   setUser: () => null,
+  isLoading: true,
 });
 
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
@@ -23,10 +25,10 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User>(null);
 
   useEffect(() => {
-    if (isPending === false && data?.user) {
-      setUser(data.user);
+    if (data?.user) {
+      setUser(data.user as User);
     }
-  }, [isPending, data?.user]);
+  }, [data?.user]);
 
   if (isPending) {
     return null;
@@ -37,6 +39,7 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
       value={{
         user,
         setUser,
+        isLoading: isPending,
       }}
     >
       {children}

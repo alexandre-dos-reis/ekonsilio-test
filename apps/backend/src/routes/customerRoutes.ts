@@ -64,7 +64,6 @@ export const customerRoutes = new Hono<App>()
       "json",
       z.object({
         messageContent: z.string().nonempty(),
-        messageTimestamp: z.number(),
       }),
     ),
     async (c) => {

@@ -1,6 +1,6 @@
 import { Alert, Button, ChatBubble, cn, Input } from "@ek/ui";
 import { client, wsClient } from "@/utils/client";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { getData, sendData } from "@ek/shared";
 import { useUserContext } from "@/contexts/user";
@@ -12,7 +12,14 @@ export const Route = createFileRoute("/chat/$conversationId")({
     const res = await client.conversations[":id"].$get({
       param: { id: conversationId },
     });
-    return res.json();
+
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw redirect({
+        to: "/signin",
+      });
+    }
   },
   component: RouteComponent,
 });
@@ -76,7 +83,6 @@ function RouteComponent() {
 
   useEffect(() => {
     ws.addEventListener("message", onMessage);
-
     return () => {
       ws.removeEventListener("message", onMessage);
       ws.close();
