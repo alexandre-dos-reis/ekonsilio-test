@@ -53,6 +53,7 @@ app
     "chat/:conversationId",
     upgradeWebSocket((c) => {
       const convId = c.req.param("conversationId");
+      const customer = c.get("customer");
 
       return {
         onOpen: (_, ws) => {
@@ -64,7 +65,7 @@ app
           switch (wsData.event) {
             case "message": {
               const data = wsData.data;
-              const customer = c.get("customer");
+              console.log(customer);
 
               await db.insert(messages).values({
                 content: data.content,
@@ -94,7 +95,7 @@ const server = serve(
   },
 );
 
-// injectWebSocket(server);
+injectWebSocket(server);
 
 // graceful shutdown
 process.on("SIGINT", () => {
