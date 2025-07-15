@@ -1,3 +1,3 @@
-export const authBasePath = "/auth";
-export const customerAuthBasePath = `${authBasePath}/customer`;
-export const geniusAuthBasePath = `${authBasePath}/genius`;
+export const authBasePath = "/auth" as const;
+export const customerAuthBasePath = `${authBasePath}/customer` as const;
+export const geniusAuthBasePath = `${authBasePath}/genius` as const;

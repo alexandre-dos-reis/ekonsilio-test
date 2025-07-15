@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
-import viteReact from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -11,7 +10,10 @@ export default defineConfig({
   plugins: [
     tsconfigPaths(),
     tailwindcss(),
-    tanstackRouter({ autoCodeSplitting: true }),
-    viteReact(),
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
+    react(),
   ],
 });
