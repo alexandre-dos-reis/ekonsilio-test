@@ -1,4 +1,5 @@
-import type { GeniusRoutes, ChatRoutes } from "@ek/backend";
+import type { GeniusRoutes } from "../../../backend/src/routes/geniusRoutes";
+import type { ChatRoutes } from "../../../backend/src/routes/chatRoutes";
 import { createClient } from "@ek/shared";
 
 export const client = createClient<GeniusRoutes>(

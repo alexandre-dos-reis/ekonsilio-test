@@ -7,6 +7,7 @@ import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
 import type { App } from "./types";
 import { customerRoutes } from "./routes/customerRoutes";
 import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
+import { geniusRoutes } from "./routes/geniusRoutes";
 
 const app = new Hono<App>();
 
@@ -27,6 +28,7 @@ app
     return geniusAuth.handler(c.req.raw);
   })
   .route("/", chatRoutes)
+  .route("/", geniusRoutes)
   .route("/", customerRoutes);
 
 const server = serve(

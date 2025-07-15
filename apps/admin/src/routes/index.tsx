@@ -18,8 +18,8 @@ export const Route = createFileRoute("/")({
     }
   },
   loader: async () => {
-    // const res = await client.conversations.$get();
-    // return res.json();
+    const res = await client.conversations.$get();
+    return res.json();
   },
   component: RouteComponent,
 });

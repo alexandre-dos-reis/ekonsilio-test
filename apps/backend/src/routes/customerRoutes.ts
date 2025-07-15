@@ -31,15 +31,6 @@ export const customerRoutes = new Hono<App>()
 
     return next();
   })
-  .use(async (c, next) => {
-    const customerSession = await customerAuth.api.getSession({
-      headers: c.req.raw.headers,
-    });
-
-    c.set("customer", customerSession ? customerSession.user : null);
-
-    return next();
-  })
   .get("/conversations", async (c) => {
     const customer = c.get("customer");
 
