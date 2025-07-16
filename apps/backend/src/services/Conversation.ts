@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { PubSubBroker, type WS } from "@/utils/PubSubBroker";
+import { db } from "../db";
+import { PubSubBroker, type WS } from "../utils/PubSubBroker";
 import type { User } from "@ek/auth";
 import { conversations, messages, users, eq, inArray } from "@ek/db";
 import { getData, type SocketMessage } from "@ek/shared";

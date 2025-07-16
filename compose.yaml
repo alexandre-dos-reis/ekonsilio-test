@@ -1,10 +1,7 @@
-volumes:
-  database:
-
 services:
   database:
     image: postgres:17-alpine
-    container_name: ekonsilio-db-postgres
+    container_name: adr-ekonsilio-db-postgres
     restart: unless-stopped
     ports:
       - ${POSTGRES_PORT}:5432
@@ -14,3 +11,56 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./.docker/volumes/database/data:/var/lib/postgresql/data
+
+  db-migrations:
+    container_name: adr-ekonsilio-db-migration
+    build:
+      context: .
+      dockerfile: packages/db/Dockerfile
+    depends_on:
+      - database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: database
+
+  backend:
+    container_name: adr-ekonsilio-backend
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    depends_on:
+      - database
+    ports:
+      - 3001:3001
+    environment:
+      PORT: 3001
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: database
+      CUSTOMER_TRUSTED_ORIGIN: "http://localhost:5300"
+      GENIUS_TRUSTED_ORIGIN: "http://localhost:4300"
+
+  admin:
+    container_name: adr-ekonsilio-admin
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    ports:
+      - 4300:8043
+    depends_on:
+      - backend
+
+  live-chat:
+    container_name: adr-ekonsilio-live-chat
+    build:
+      context: .
+      dockerfile: apps/live-chat/Dockerfile
+    ports:
+      - 5300:8043
+    depends_on:
+      - backend

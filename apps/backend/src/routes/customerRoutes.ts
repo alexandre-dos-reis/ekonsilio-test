@@ -11,7 +11,7 @@ import {
 import z from "zod";
 import { Hono } from "hono";
 import type { App } from "..";
-import { auth } from "@/auth";
+import { auth } from "../auth";
 
 export const conversationCols = (() => {
   const { id, status, createdAt } = getTableColumns(conversations);

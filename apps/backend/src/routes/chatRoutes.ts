@@ -2,8 +2,8 @@ import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
 import type { App } from "..";
 import { type User } from "@ek/auth";
-import { authMiddleware } from "@/middleware/auth";
-import { ConversationService } from "@/services/Conversation";
+import { authMiddleware } from "../middleware/auth";
+import { ConversationService } from "../services/Conversation";
 
 const chatRoutes = new Hono<App>().basePath("/chat");
 

@@ -4,11 +4,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./react": "./src/react.ts"
+    "./client": "./src/client.ts",
+    "./constants": "./src/constants.ts"
   },
   "dependencies": {
     "@ek/db": "workspace:*",
-    "@better-auth/cli": "^1.2.12",
-    "better-auth": "^1.2.12"
+    "@better-auth/cli": "^1.2.12"
   }
 }

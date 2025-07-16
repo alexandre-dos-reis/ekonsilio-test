@@ -7,9 +7,9 @@
     "./types": "./src/types.ts"
   },
   "scripts": {
-    "db:generate": "bun drizzle-kit generate",
-    "db:migrate": "bun drizzle-kit migrate",
-    "db:push": "bun drizzle-kit push"
+    "db:generate": "pnpm exec drizzle-kit generate",
+    "db:migrate": "pnpm exec drizzle-kit migrate",
+    "db:push": "pnpm exec drizzle-kit push"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.2",

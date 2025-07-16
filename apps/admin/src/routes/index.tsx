@@ -29,7 +29,7 @@ export type Conversations = Array<{
 }>;
 
 function RouteComponent() {
-  const [pastConversations, setPastConversations] = useState<Conversations>(
+  const [pastConversations] = useState<Conversations>(
     Route.useLoaderData()
       .pastConversations.map((c) => ({
         content: c.messages.content,

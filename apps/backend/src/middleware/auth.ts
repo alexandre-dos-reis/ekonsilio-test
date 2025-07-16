@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "../auth";
 import { createMiddleware } from "hono/factory";
 
 export const authMiddleware = createMiddleware(async (c, next) => {

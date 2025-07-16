@@ -32,7 +32,6 @@ function RouteComponent() {
   const [status, setStatus] = useState<
     NonNullable<typeof conversation>["status"]
   >(conversation?.status || "init");
-  const [isUserOnline, setIsUserOnline] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Array<string>>();
 
   const [messages, setMessages] = useState(conversation?.messages || []);
@@ -66,7 +65,6 @@ function RouteComponent() {
         ]);
         break;
       case "join-conversation":
-        setIsUserOnline(true);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
@@ -75,7 +73,6 @@ function RouteComponent() {
         });
         break;
       case "quit-conversation":
-        setIsUserOnline(false);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
@@ -165,7 +162,7 @@ function RouteComponent() {
                   user: {
                     id: user.id,
                     name: user.name,
-                    role: user.role,
+                    role: user.role!,
                   },
                 },
               }),

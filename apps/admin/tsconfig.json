@@ -1,7 +1,10 @@
 {
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "./src"
+  ],
+  "exclude": [
+    "../../apps/backend",
+    "../../apps/live-chat"
   ],
   "compilerOptions": {
     "target": "ES2022",

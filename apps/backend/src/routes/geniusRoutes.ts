@@ -1,9 +1,9 @@
 import { db } from "../db";
-import { conversations, eq, messages, and, users } from "@ek/db";
+import { conversations, eq, messages, users } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
-import { auth } from "@/auth";
+import { auth } from "../auth";
 
 export const geniusRoutes = new Hono<App>()
   .basePath("/genius")

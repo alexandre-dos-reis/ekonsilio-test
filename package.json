@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "bun --filter '*' dev",
     "project": "bun --filter --",
-    "db:generate": "cd packages/db && bun run db:generate",
-    "db:migrate": "cd packages/db && bun run db:migrate",
-    "db:push": "cd packages/db && bun run db:push"
+    "db:generate": "cd packages/db && pnpm run db:generate",
+    "db:migrate": "cd packages/db && pnpm run db:migrate",
+    "db:push": "cd packages/db && pnpm run db:push"
   },
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
@@ -15,6 +15,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "better-auth": "^1.2.12",
     "hono": "^4.8.5"
   }
 }

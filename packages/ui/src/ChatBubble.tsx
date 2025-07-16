@@ -1,4 +1,3 @@
-import { AnimatePing } from "./AnimatePing";
 import { cn } from "./cn";
 import { getRelativeTime } from "./func";
 

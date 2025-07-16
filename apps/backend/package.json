@@ -3,12 +3,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env --env-file=.env src/index.ts",
-    "build": "tsc",
+    "build": "tsup ./src/index.ts ./dist/index.js",
     "start": "node dist/index.js"
   },
-  "exports": {
-    "types": "./src/exports/types.ts"
-  },
+  "types": "./src/exports/types.ts",
   "dependencies": {
     "@ek/auth": "workspace:*",
     "@ek/db": "workspace:*",
@@ -17,9 +15,11 @@
     "@hono/node-ws": "^1.2.0",
     "@hono/zod-validator": "^0.7.0",
     "@t3-oss/env-core": "^0.13.8",
+    "postgres": "^3.4.7",
     "zod": "^4.0.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17"
+    "@types/node": "^20.11.17",
+    "tsup": "^8.5.0"
   }
 }

@@ -9,6 +9,8 @@ import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
 import { authMiddleware } from "./middleware/auth";
 
+import "./utils/db-migration";
+
 export type App = {
   Variables: {
     user: typeof auth.$Infer.Session.user;
