@@ -2,10 +2,6 @@
   "name": "@ek/core",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
   "scripts": {
     "dev": "bun --filter '*' dev",
     "project": "bun --filter --",
