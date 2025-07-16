@@ -1,0 +1,14 @@
+{
+  "name": "@ek/clients",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ek/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@ek/auth": "workspace:*"
+  }
+}

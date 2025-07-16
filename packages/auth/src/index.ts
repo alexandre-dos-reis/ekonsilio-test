@@ -1,9 +1,7 @@
 import { accounts, sessions, users, verifications } from "@ek/db";
+import { authBasePath } from "@ek/shared";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { authBasePath } from "./constants";
-
-export * from "./constants";
 
 export const getAuth = (args: {
   customerTrustedOrigin: string;

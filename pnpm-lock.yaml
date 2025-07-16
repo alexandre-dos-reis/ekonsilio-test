@@ -27,6 +27,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@ek/clients':
+        specifier: workspace:*
+        version: link:../../packages/clients
       '@ek/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -140,6 +143,9 @@ importers:
 
   apps/live-chat:
     dependencies:
+      '@ek/clients':
+        specifier: workspace:*
+        version: link:../../packages/clients
       '@ek/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -228,6 +234,19 @@ importers:
       '@ek/db':
         specifier: workspace:*
         version: link:../db
+      '@ek/shared':
+        specifier: workspace:*
+        version: link:../shared
+
+  packages/clients:
+    dependencies:
+      '@ek/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@ek/auth':
+        specifier: workspace:*
+        version: link:../auth
 
   packages/db:
     dependencies:

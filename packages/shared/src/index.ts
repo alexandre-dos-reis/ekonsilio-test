@@ -2,6 +2,8 @@ import type { StatusConv } from "@ek/db/types";
 import type { Hono } from "hono";
 import { hc } from "hono/client";
 
+export const authBasePath = "/auth" as const;
+
 export type SocketMessage =
   | {
       event: "message";

@@ -3,11 +3,11 @@ import { Hono } from "hono";
 import { env } from "./env";
 import { auth } from "./auth";
 import { cors } from "hono/cors";
-import { authBasePath } from "@ek/auth";
 import { customerRoutes } from "./routes/customerRoutes";
 import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
 import { authMiddleware } from "./middleware/auth";
+import { authBasePath } from "@ek/shared";
 
 export type App = {
   Variables: {

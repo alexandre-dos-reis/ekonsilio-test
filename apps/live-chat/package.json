@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ek/clients": "workspace:*",
     "@ek/shared": "workspace:*",
     "@ek/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
