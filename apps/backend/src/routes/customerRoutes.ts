@@ -11,6 +11,7 @@ import {
 import z from "zod";
 import { Hono } from "hono";
 import type { App } from "..";
+import { auth } from "@/auth";
 
 export const conversationCols = (() => {
   const { id, status, createdAt } = getTableColumns(conversations);
@@ -28,6 +29,7 @@ export const customerRoutes = new Hono<App>()
     const user = c.get("user");
 
     if (user.role !== "customer") {
+      auth.api.signOut({ headers: c.req.raw.headers });
       return c.json(null, 403);
     }
 

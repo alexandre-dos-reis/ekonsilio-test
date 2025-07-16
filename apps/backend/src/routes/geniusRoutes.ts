@@ -3,15 +3,15 @@ import { conversations, eq, messages, and, users } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
+import { auth } from "@/auth";
 
 export const geniusRoutes = new Hono<App>()
   .basePath("/genius")
   .use(async (c, next) => {
     const user = c.get("user");
 
-    console.log({ DEBUG: user });
-
     if (user.role !== "genius") {
+      auth.api.signOut({ headers: c.req.raw.headers });
       return c.json(null, 403);
     }
 
