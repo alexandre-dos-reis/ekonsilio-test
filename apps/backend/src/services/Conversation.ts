@@ -1,0 +1,120 @@
+import { db } from "@/db";
+import { PubSubBroker, type WS } from "@/helper/PubSubBroker";
+import type { User } from "@ek/auth";
+import { conversations, messages, users, eq, inArray } from "@ek/db";
+import { getData, type SocketMessage } from "@ek/shared";
+import type { WSMessageReceive } from "hono/ws";
+
+export class ConversationService {
+  private broker = new PubSubBroker<SocketMessage, { status: string }>();
+
+  private readonly GENIUS_WAITING_ROOM = "GENIUS_WAITING_ROOM";
+
+  public async enterConversation(
+    convId: string,
+    ws: WS,
+    user: NonNullable<User>,
+  ) {
+    let [conv] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, convId));
+
+    this.broker.subscribe(convId, ws, { status: conv.status || "init" });
+
+    if (user.role === "genius" && conv.status === "init") {
+      conv = (
+        await db
+          .update(conversations)
+          .set({ status: "active" })
+          .where(eq(conversations.id, convId))
+          .returning()
+      ).at(0)!;
+    }
+
+    this.broker.publish(
+      convId,
+      {
+        event: "join-conversation",
+        data: {
+          userName: user.name,
+          conversationStatus: conv.status ?? undefined,
+        },
+      },
+      ws,
+    );
+  }
+
+  public leaveConversation(convId: string, ws: WS, user: NonNullable<User>) {
+    this.broker.publish(
+      convId,
+      {
+        event: "quit-conversation",
+        data: { userName: user.name },
+      },
+      ws,
+    );
+    this.broker.unsubscribe(convId, ws);
+  }
+
+  public async speak(
+    event: MessageEvent<WSMessageReceive>,
+    ws: WS,
+    convId: string,
+    user: NonNullable<User>,
+  ) {
+    const wsData = getData(event.data.toString());
+
+    if (wsData.event === "message") {
+      const data = wsData.data;
+
+      await db.insert(messages).values({
+        content: data.content,
+        userId: user.id,
+        conversationId: convId,
+        createdAt: data.createdAt,
+      });
+
+      this.broker.publish(convId, wsData, ws);
+    }
+  }
+
+  public enterGeniusWaitingRoom(ws: WS) {
+    this.broker.subscribe(this.GENIUS_WAITING_ROOM, ws);
+  }
+
+  public leaveGeniusWaitingRoom(ws: WS) {
+    this.broker.unsubscribe(this.GENIUS_WAITING_ROOM, ws);
+  }
+
+  public async sendNewConversationsToGenius() {
+    const convsWithInitStatus = this.broker
+      .getConversations()
+      .filter((c) => c.state.status === "init")
+      .map((c) => c.id);
+
+    const subquery = db
+      .selectDistinctOn([messages.conversationId])
+      .from(messages)
+      .as("messages");
+
+    const convs = await db
+      .select()
+      .from(conversations)
+      .innerJoin(users, eq(users.id, conversations.createdById))
+      .innerJoin(subquery, eq(subquery.conversationId, conversations.id))
+      .where(inArray(conversations.id, convsWithInitStatus));
+
+    this.broker.publish(this.GENIUS_WAITING_ROOM, {
+      event: "conversations-waiting-for-genius",
+      data: {
+        convs: convs.map((c) => ({
+          id: c.conversations.id,
+          content: c.messages.content,
+          createdAt: c.messages.createdAt,
+          userName: c.users.name,
+        })),
+      },
+    });
+  }
+}
