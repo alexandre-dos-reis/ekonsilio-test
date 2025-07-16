@@ -33,6 +33,7 @@ services:
       dockerfile: apps/backend/Dockerfile
     depends_on:
       - database
+      - db-migrations
     ports:
       - 3001:3001
     environment:
