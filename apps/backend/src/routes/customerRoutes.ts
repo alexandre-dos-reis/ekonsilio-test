@@ -10,7 +10,7 @@ import {
 } from "@ek/db";
 import z from "zod";
 import { Hono } from "hono";
-import { customerAuth } from "@/auth";
+import type { App } from "..";
 
 export const conversationCols = (() => {
   const { id, status, createdAt } = getTableColumns(conversations);
@@ -22,27 +22,19 @@ export const messageCols = (() => {
   return { id, userId, content, createdAt };
 })();
 
-export const customerRoutes = new Hono<{
-  Variables: {
-    customer: (typeof customerAuth)["$Infer"]["Session"]["user"];
-  };
-}>()
+export const customerRoutes = new Hono<App>()
   .basePath("/customers")
   .use(async (c, next) => {
-    const customerSession = await customerAuth.api.getSession({
-      headers: c.req.raw.headers,
-    });
+    const user = c.get("user");
 
-    if (!customerSession) {
-      return c.json({ error: "Unauthorized" }, 403);
+    if (user.role !== "customer") {
+      return c.json(null, 403);
     }
-
-    c.set("customer", customerSession.user);
 
     return next();
   })
   .get("/conversations", async (c) => {
-    const customer = c.get("customer");
+    const customer = c.get("user");
 
     if (!customer) {
       return c.json({ error: "Customer must be authenticated !" });
@@ -68,7 +60,7 @@ export const customerRoutes = new Hono<{
       }),
     ),
     async (c) => {
-      const customer = c.get("customer");
+      const customer = c.get("user");
 
       if (!customer) {
         return c.json({ error: "User must be authenticated !" });
@@ -98,7 +90,7 @@ export const customerRoutes = new Hono<{
   )
   .get("/conversations/:id", async (c) => {
     const convId = c.req.param("id");
-    const customer = c.get("customer");
+    const customer = c.get("user");
 
     const [[conv], msgs] = await Promise.all([
       db

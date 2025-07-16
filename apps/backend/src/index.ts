@@ -1,15 +1,24 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { env } from "./env";
-import { customerAuth, geniusAuth } from "./auth";
+import { auth } from "./auth";
 import { cors } from "hono/cors";
-import { customerAuthBasePath, geniusAuthBasePath } from "@ek/auth";
+import { authBasePath } from "@ek/auth";
 import { customerRoutes } from "./routes/customerRoutes";
 import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
+import { authMiddleware } from "./middleware/auth";
 
-const app = new Hono()
+export type App = {
+  Variables: {
+    user: typeof auth.$Infer.Session.user;
+    session: typeof auth.$Infer.Session.session | null;
+  };
+};
+
+const app = new Hono<App>()
   .use(
+    "*",
     cors({
       origin: [env.CUSTOMER_TRUSTED_ORIGIN, env.GENIUS_TRUSTED_ORIGIN],
       credentials: true,
@@ -17,11 +26,9 @@ const app = new Hono()
       allowMethods: ["GET", "POST", "OPTIONS"],
     }),
   )
-  .on(["POST", "GET"], `${customerAuthBasePath}/**`, (c) => {
-    return customerAuth.handler(c.req.raw);
-  })
-  .on(["POST", "GET"], `${geniusAuthBasePath}/**`, (c) => {
-    return geniusAuth.handler(c.req.raw);
+  .use(authMiddleware)
+  .on(["POST", "GET"], `${authBasePath}/**`, (c) => {
+    return auth.handler(c.req.raw);
   })
   .route("/", chatRoutes)
   .route("/", geniusRoutes)

@@ -1,5 +1,5 @@
-import { getCustomerAuthClient } from "@ek/auth/react";
+import { getAuthClient } from "@ek/auth/react";
 
-export const authClient = getCustomerAuthClient({
+export const authClient = getAuthClient({
   baseURL: import.meta.env.VITE_BACKEND_URL,
 });

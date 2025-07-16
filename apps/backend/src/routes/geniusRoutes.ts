@@ -1,30 +1,24 @@
-import { geniusAuth } from "@/auth";
 import { db } from "../db";
 import { conversations, eq, messages, and, users } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
+import type { App } from "..";
 
-export const geniusRoutes = new Hono<{
-  Variables: {
-    genius: (typeof geniusAuth)["$Infer"]["Session"]["user"];
-  };
-}>()
+export const geniusRoutes = new Hono<App>()
   .basePath("/genius")
   .use(async (c, next) => {
-    const geniusSession = await geniusAuth.api.getSession({
-      headers: c.req.raw.headers,
-    });
+    const user = c.get("user");
 
-    if (!geniusSession) {
-      return c.json({ error: "Unauthorized" }, 403);
+    console.log({ DEBUG: user });
+
+    if (user.role !== "genius") {
+      return c.json(null, 403);
     }
-
-    c.set("genius", geniusSession.user);
 
     return next();
   })
   .get("/conversations", async (c) => {
-    const genius = c.get("genius");
+    const genius = c.get("user");
 
     const pastConversations = await db
       .selectDistinctOn([messages.conversationId])

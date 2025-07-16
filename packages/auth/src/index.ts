@@ -1,25 +1,19 @@
 import { accounts, sessions, users, verifications } from "@ek/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { customerAuthBasePath, geniusAuthBasePath } from "./constants";
+import { authBasePath } from "./constants";
 
 export * from "./constants";
 
 export const getAuth = (args: {
-  trustedOrigin: string;
-  role: "customer" | "genius";
-  basePath?: string;
+  customerTrustedOrigin: string;
+  geniusTrustedOrigin: string;
   db: Parameters<typeof drizzleAdapter>[0];
   secret: string; // Used for signing, hashing and encryption
 }) =>
   betterAuth({
-    basePath:
-      args.role === "customer"
-        ? customerAuthBasePath
-        : args.role === "genius"
-          ? geniusAuthBasePath
-          : args.basePath,
-    trustedOrigins: [args.trustedOrigin],
+    basePath: authBasePath,
+    trustedOrigins: [args.customerTrustedOrigin, args.geniusTrustedOrigin],
     secret: args.secret,
     database: drizzleAdapter(args.db, {
       provider: "pg",
@@ -36,7 +30,14 @@ export const getAuth = (args: {
     databaseHooks: {
       user: {
         create: {
-          before: async (user) => ({ data: { ...user, role: args.role } }),
+          before: async (user, ctx) => {
+            const origin = ctx?.request?.headers.get("origin");
+
+            const role =
+              origin === args.geniusTrustedOrigin ? "genius" : "customer";
+
+            return { data: { ...user, role } };
+          },
         },
       },
     },
@@ -45,14 +46,12 @@ export const getAuth = (args: {
         role: {
           type: "string",
           required: true,
-          defaultValue: args.role,
           input: false, // don't allow user to set role
         },
       },
     },
     advanced: {
       database: { generateId: false },
-      cookiePrefix: args.role,
     },
   });
 
