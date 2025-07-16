@@ -31,9 +31,9 @@ Les deux applications frontend sont accessibles aux URL suivantes :
 ### Backend
 
 - **Hono** : mini-framework compatible avec tous les runtimes JavaScript (Node.js, Bun, Deno, Cloudflare, etc.). Bonne compatibilité avec TypeScript. Dispose d'une API simple pour la gestion des WebSockets.
+  - Inclut un client RPC façon tRPC, permettant de consommer facilement les routes depuis le frontend.
 - **Drizzle ORM** : API proche du SQL, permettant une meilleure lisibilité. Offre surtout des types TypeScript solides, facilitant le développement type-safe.
 - **BetterAuth** : solution d’authentification légère, basée sur l’utilisation de cookies. Compatible avec les ORMs et bases de données modernes, notamment ici avec Drizzle.
-- Inclut un client RPC façon tRPC, permettant de consommer facilement les routes depuis le frontend.
 
 ### Frontend
 
