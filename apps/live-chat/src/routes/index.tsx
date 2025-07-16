@@ -70,24 +70,30 @@ function RouteComponent() {
       </form>
       <h2 className="text-2xl font-bold pb-5 py-10">Your past conversations</h2>
       <ul className="grid grid-cols-2 gap-2">
-        {pastConversations
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-          .map((c) => {
-            return (
-              <li key={c.id}>
-                <Link
-                  to="/chat/$conversationId"
-                  params={{ conversationId: c.conversationId }}
-                  className="bg-base-300 flex justify-between items-center px-2 py-1"
-                >
-                  <div>{c.content}</div>
-                  <div className="text-xs text-neutral-500">
-                    {getRelativeTime(c.createdAt)}
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
+        {pastConversations.length === 0 ? (
+          <div className="col-span-2 italic text-center text-sm text-neutral-500">
+            None at the moment.
+          </div>
+        ) : (
+          pastConversations
+            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+            .map((c) => {
+              return (
+                <li key={c.id}>
+                  <Link
+                    to="/chat/$conversationId"
+                    params={{ conversationId: c.conversationId }}
+                    className="bg-base-300 flex justify-between items-center px-2 py-1"
+                  >
+                    <div>{c.content}</div>
+                    <div className="text-xs text-neutral-500">
+                      {getRelativeTime(c.createdAt)}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })
+        )}
       </ul>
     </div>
   );

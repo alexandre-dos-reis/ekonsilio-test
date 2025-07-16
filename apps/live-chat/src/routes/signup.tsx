@@ -14,7 +14,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 function RouteComponent() {
-  const [email, setEmail] = useState("ajm.dosreis.daponte@gmail.com");
+  const [email, setEmail] = useState("alexandre@gmail.com");
   const [name, setName] = useState("Alexandre Dos Reis");
   const [password, setPassword] = useState("password");
   const navigate = useNavigate({ from: "/signup" });
@@ -39,6 +39,7 @@ function RouteComponent() {
                 toast("Email is already taken !", { type: "error" });
                 break;
               default:
+                console.error(error);
                 toast("An error occured, try again later !", {
                   type: "error",
                 });

@@ -19,6 +19,15 @@ const routes = chatRoutes
     "/",
     upgradeWebSocket(async (c) => {
       const user = c.get("user") as NonNullable<User>;
+
+      if (user.role !== "genius") {
+        return {
+          onOpen: async (_, ws) => {
+            ws.close(403);
+          },
+        };
+      }
+
       return {
         onOpen: async (_, ws) => {
           convService.enterGeniusWaitingRoom(ws, user.id);
