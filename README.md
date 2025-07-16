@@ -1,5 +1,21 @@
 # EKonsilio | Test technique
 
+## Démo
+
+Le lancement de la démo ne nécessite qu'une seule dépendance : `Docker` en `version 28` minimum.
+Lancer la stack avec cette commande : `docker compose up -d`
+
+### Accès aux applications frontend
+
+Les deux applications frontend sont accessibles aux URL suivantes :
+
+- **Live-Chat** : [http://localhost:5300](http://localhost:5300)
+- **Admin-Chat** : [http://localhost:4300](http://localhost:4300)
+
+> ⚠️ **Attention** : pour tester les deux applications simultanément, ouvrez-les dans **deux navigateurs différents**.  
+> Les cookies étant partagés entre ports sur un même domaine (`localhost`), cela peut entraîner un écrasement de session.  
+> Ce problème ne se produira pas en production, où chaque application disposera de son propre nom de domaine.
+
 ## Choix techniques
 
 ### Gestionnaire de paquets : `pnpm`
