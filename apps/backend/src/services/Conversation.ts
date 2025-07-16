@@ -30,6 +30,8 @@ export class ConversationService {
           .where(eq(conversations.id, convId))
           .returning()
       ).at(0)!;
+
+      this.broker.setConversationState(convId, { status: "active" });
     }
 
     this.broker.publish(

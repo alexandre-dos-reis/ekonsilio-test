@@ -55,4 +55,10 @@ export class PubSubBroker<
       id: convId,
     }));
   }
+
+  setConversationState(convId: string, newState: TState) {
+    const conversation = this.conversations.get(convId);
+    if (!conversation) return;
+    conversation.state = newState;
+  }
 }

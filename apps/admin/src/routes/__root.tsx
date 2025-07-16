@@ -1,6 +1,5 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Navbar } from "../components/Navbar";
-
 import { ToastContainer } from "react-toastify";
 import { type UserContextType } from "@/contexts/user";
 

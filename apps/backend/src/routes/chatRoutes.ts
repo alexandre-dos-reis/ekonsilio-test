@@ -35,7 +35,7 @@ const routes = chatRoutes
 
       return {
         onOpen: async (_, ws) => {
-          convService.enterConversation(convId, ws, user);
+          await convService.enterConversation(convId, ws, user);
 
           await convService.sendNewConversationsToGenius();
         },

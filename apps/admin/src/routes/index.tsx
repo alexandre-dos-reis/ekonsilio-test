@@ -1,9 +1,7 @@
 import { ConversationList } from "@/components/ConversationList";
 import { client, wsClient } from "@/utils/client";
 import { getData } from "@ek/shared";
-
-import { getRelativeTime } from "@ek/ui";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
 import { useCallback } from "react";
