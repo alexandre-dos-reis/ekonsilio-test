@@ -28,7 +28,7 @@ function RouteComponent() {
   const conversation = Route.useLoaderData();
   const { conversationId } = Route.useParams();
   const { user } = useUserContext();
-  const [isUserOnline, setIsUserOnline] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<Array<string>>();
 
   const [status, setStatus] = useState<
     NonNullable<typeof conversation>["status"]
@@ -64,7 +64,6 @@ function RouteComponent() {
         ]);
         break;
       case "join-conversation":
-        setIsUserOnline(true);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
@@ -73,13 +72,15 @@ function RouteComponent() {
         });
         break;
       case "quit-conversation":
-        setIsUserOnline(false);
         if (message.data.conversationStatus) {
           setStatus(message.data.conversationStatus);
         }
         toast(`${message.data.userName} has left the conversation !`, {
           type: "info",
         });
+        break;
+      case "users-currently-present-in-the-conversation":
+        setOnlineUsers(message.data.usersId);
         break;
     }
   }, []);
@@ -129,7 +130,7 @@ function RouteComponent() {
             content={m.content}
             createdAt={m.createdAt}
             picture={m.userId === user?.id ? "anakeen" : "kenobee"}
-            isOnline={m.userId !== user?.id && isUserOnline}
+            isOnline={!!onlineUsers?.find((userId) => userId === m.userId)}
           />
         ))}
       </div>

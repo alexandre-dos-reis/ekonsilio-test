@@ -17,15 +17,18 @@ const routes = chatRoutes
   .use(authMiddleware)
   .get(
     "/",
-    upgradeWebSocket(async () => ({
-      onOpen: async (_, ws) => {
-        convService.enterGeniusWaitingRoom(ws);
-        await convService.sendNewConversationsToGenius();
-      },
-      onClose: async (_, ws) => {
-        convService.leaveGeniusWaitingRoom(ws);
-      },
-    })),
+    upgradeWebSocket(async (c) => {
+      const user = c.get("user") as NonNullable<User>;
+      return {
+        onOpen: async (_, ws) => {
+          convService.enterGeniusWaitingRoom(ws, user.id);
+          await convService.sendNewConversationsToGenius();
+        },
+        onClose: async () => {
+          convService.leaveGeniusWaitingRoom(user.id);
+        },
+      };
+    }),
   )
   .get(
     "/:conversationId",
@@ -36,14 +39,15 @@ const routes = chatRoutes
       return {
         onOpen: async (_, ws) => {
           await convService.enterConversation(convId, ws, user);
-
+          convService.sendOnlineUsersIdForAConversation(convId);
           await convService.sendNewConversationsToGenius();
         },
         onMessage: async (event, ws) => {
-          await convService.speak(event, ws, convId, user);
+          await convService.sendMessage(event, ws, convId, user);
         },
         onClose: async (_, ws) => {
           convService.leaveConversation(convId, ws, user);
+          convService.sendOnlineUsersIdForAConversation(convId);
           await convService.sendNewConversationsToGenius();
         },
       };

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { PubSubBroker, type WS } from "@/helper/PubSubBroker";
+import { PubSubBroker, type WS } from "@/utils/PubSubBroker";
 import type { User } from "@ek/auth";
 import { conversations, messages, users, eq, inArray } from "@ek/db";
 import { getData, type SocketMessage } from "@ek/shared";
@@ -20,7 +20,9 @@ export class ConversationService {
       .from(conversations)
       .where(eq(conversations.id, convId));
 
-    this.broker.subscribe(convId, ws, { status: conv.status || "init" });
+    this.broker.subscribe(convId, ws, user.id, {
+      status: conv.status || "init",
+    });
 
     if (user.role === "genius" && conv.status === "init") {
       conv = (
@@ -56,10 +58,10 @@ export class ConversationService {
       },
       ws,
     );
-    this.broker.unsubscribe(convId, ws);
+    this.broker.unsubscribe(convId, user.id);
   }
 
-  public async speak(
+  public async sendMessage(
     event: MessageEvent<WSMessageReceive>,
     ws: WS,
     convId: string,
@@ -81,12 +83,26 @@ export class ConversationService {
     }
   }
 
-  public enterGeniusWaitingRoom(ws: WS) {
-    this.broker.subscribe(this.GENIUS_WAITING_ROOM, ws);
+  public sendOnlineUsersIdForAConversation(convId: string) {
+    const conv = this.broker.getConversation(convId);
+    if (!conv) {
+      return;
+    }
+
+    const onlineUsersId = Array.from(conv.subscriptions.keys());
+
+    this.broker.publish(convId, {
+      event: "users-currently-present-in-the-conversation",
+      data: { usersId: onlineUsersId },
+    });
   }
 
-  public leaveGeniusWaitingRoom(ws: WS) {
-    this.broker.unsubscribe(this.GENIUS_WAITING_ROOM, ws);
+  public enterGeniusWaitingRoom(ws: WS, geniusId: string) {
+    this.broker.subscribe(this.GENIUS_WAITING_ROOM, ws, geniusId);
+  }
+
+  public leaveGeniusWaitingRoom(geniusId: string) {
+    this.broker.unsubscribe(this.GENIUS_WAITING_ROOM, geniusId);
   }
 
   public async sendNewConversationsToGenius() {

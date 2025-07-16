@@ -33,6 +33,10 @@ export type SocketMessage =
           content: string;
         }>;
       };
+    }
+  | {
+      event: "users-currently-present-in-the-conversation";
+      data: { usersId: Array<string> };
     };
 
 export const getData = (rawData: any) => {

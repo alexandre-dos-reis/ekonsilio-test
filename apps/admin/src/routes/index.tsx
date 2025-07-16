@@ -30,12 +30,14 @@ export type Conversations = Array<{
 
 function RouteComponent() {
   const [pastConversations, setPastConversations] = useState<Conversations>(
-    Route.useLoaderData().pastConversations.map((c) => ({
-      content: c.messages.content,
-      createdAt: c.messages.createdAt,
-      conversationId: c.conversations.id,
-      userName: c.users.name,
-    })),
+    Route.useLoaderData()
+      .pastConversations.map((c) => ({
+        content: c.messages.content,
+        createdAt: c.messages.createdAt,
+        conversationId: c.conversations.id,
+        userName: c.users.name,
+      }))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   );
   const [liveConversations, setLiveConversations] = useState<Conversations>([]);
 
