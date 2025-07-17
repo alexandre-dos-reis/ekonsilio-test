@@ -50,7 +50,7 @@ function RouteComponent() {
             if (res.ok) {
               const conv = await res.json();
 
-              if ("error" in conv) {
+              if ("error" in conv && typeof conv.error === "string") {
                 toast(conv.error);
               } else {
                 nav({

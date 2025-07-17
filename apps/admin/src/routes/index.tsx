@@ -37,7 +37,7 @@ function RouteComponent() {
         conversationId: c.conversations.id,
         userName: c.users.name,
       }))
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
   );
   const [liveConversations, setLiveConversations] = useState<Conversations>([]);
 
