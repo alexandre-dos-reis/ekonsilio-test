@@ -28,7 +28,7 @@ export const customerRoutes = new Hono<App>()
   .use(async (c, next) => {
     const user = c.get("user");
 
-    if (user.role !== "customer") {
+    if (!user || user.role !== "customer") {
       auth.api.signOut({ headers: c.req.raw.headers });
       return c.json(null, 403);
     }
@@ -37,10 +37,6 @@ export const customerRoutes = new Hono<App>()
   })
   .get("/conversations", async (c) => {
     const customer = c.get("user");
-
-    if (!customer) {
-      return c.json({ error: "Customer must be authenticated !" });
-    }
 
     try {
       const convs = await db
@@ -63,10 +59,6 @@ export const customerRoutes = new Hono<App>()
     ),
     async (c) => {
       const customer = c.get("user");
-
-      if (!customer) {
-        return c.json({ error: "User must be authenticated !" });
-      }
 
       const { messageContent } = c.req.valid("json");
 
