@@ -6,3 +6,4 @@ export * from "./AnimatePing";
 export * from "./Input";
 export * from "./cn";
 export * from "./func";
+export * from "./ChatConversation";
