@@ -1,4 +1,3 @@
-import type { UserRole } from "@ek/db/types";
 import type { User } from "@ek/auth";
 import { getData, sendData } from "@ek/shared";
 import { Alert, Button, ChatBubble, cn, Input } from ".";

@@ -5,9 +5,9 @@ WORKDIR /app
 COPY . .
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install
+RUN pnpm install --filter backend...
 
-RUN pnpm --filter backend run build
+RUN pnpm --filter backend... run build
 
 EXPOSE 3001
 

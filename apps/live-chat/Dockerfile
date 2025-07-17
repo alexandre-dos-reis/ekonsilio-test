@@ -4,8 +4,8 @@ WORKDIR /app
 COPY . .
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install
-RUN pnpm --filter live-chat run build
+RUN pnpm install --filter live-chat...
+RUN pnpm --filter live-chat... run build
 
 FROM pierrezemb/gostatic:latest
 COPY --from=builder /app/apps/live-chat/dist /srv/http

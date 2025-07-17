@@ -4,8 +4,8 @@ WORKDIR /app
 COPY . .
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install
-RUN pnpm --filter admin run build
+RUN pnpm install --filter admin...
+RUN pnpm --filter admin... run build
 
 FROM pierrezemb/gostatic:latest
 COPY --from=builder /app/apps/admin/dist /srv/http
