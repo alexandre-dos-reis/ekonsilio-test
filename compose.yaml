@@ -1,8 +1,13 @@
+networks:
+  adr-ekonsilio:
+
 services:
   database:
     image: postgres:17-alpine
     container_name: adr-ekonsilio-db-postgres
     restart: unless-stopped
+    networks:
+      - adr-ekonsilio
     ports:
       - ${POSTGRES_PORT}:5432
     environment:
@@ -14,6 +19,8 @@ services:
 
   db-migrations:
     container_name: adr-ekonsilio-db-migration
+    networks:
+      - adr-ekonsilio
     build:
       context: .
       dockerfile: packages/db/Dockerfile
@@ -34,6 +41,8 @@ services:
     depends_on:
       - database
       - db-migrations
+    networks:
+      - adr-ekonsilio
     ports:
       - 3001:3001
     environment:
@@ -49,8 +58,12 @@ services:
   admin:
     container_name: adr-ekonsilio-admin
     build:
+      args:
+        VITE_BACKEND_URL: http://localhost:3001
       context: .
       dockerfile: apps/admin/Dockerfile
+    networks:
+      - adr-ekonsilio
     ports:
       - 4300:8043
     depends_on:
@@ -59,8 +72,12 @@ services:
   live-chat:
     container_name: adr-ekonsilio-live-chat
     build:
+      args:
+        VITE_BACKEND_URL: http://localhost:3001
       context: .
       dockerfile: apps/live-chat/Dockerfile
+    networks:
+      - adr-ekonsilio
     ports:
       - 5300:8043
     depends_on:
