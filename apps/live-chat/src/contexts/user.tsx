@@ -5,7 +5,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { authClient } from "@/utils/auth";
+import { authClient } from "@/utils/clients";
 import type { User } from "@ek/auth";
 
 export type UserContextType = {

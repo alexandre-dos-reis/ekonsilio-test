@@ -1,6 +1,4 @@
 import type { StatusConv } from "@ek/db/types";
-import type { Hono } from "hono";
-import { hc } from "hono/client";
 
 export const authBasePath = "/auth" as const;
 
@@ -48,15 +46,3 @@ export const getData = (rawData: any) => {
 export const sendData = (data: SocketMessage) => {
   return JSON.stringify(data);
 };
-
-export const createClient = <THono extends Hono<any, any, any>>(
-  backendUrl: string,
-) =>
-  hc<THono>(backendUrl, {
-    fetch: ((input, init) => {
-      return fetch(input, {
-        ...init,
-        credentials: "include", // Required for sending cookies cross-origin
-      });
-    }) as typeof fetch,
-  });

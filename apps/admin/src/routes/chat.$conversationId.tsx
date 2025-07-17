@@ -1,5 +1,5 @@
 import { Alert, Button, ChatBubble, cn, Input } from "@ek/ui";
-import { client, wsClient } from "@/utils/client";
+import { client, wsClient } from "@/utils/clients";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { getData, sendData } from "@ek/shared";

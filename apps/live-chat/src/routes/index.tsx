@@ -1,4 +1,4 @@
-import { client } from "@/utils/client";
+import { client } from "@/utils/clients";
 import { Button, Input, getRelativeTime } from "@ek/ui";
 import {
   createFileRoute,

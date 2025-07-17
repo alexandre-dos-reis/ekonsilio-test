@@ -1,5 +1,5 @@
 import { ConversationList } from "@/components/ConversationList";
-import { client, wsClient } from "@/utils/client";
+import { client, wsClient } from "@/utils/clients";
 import { getData } from "@ek/shared";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

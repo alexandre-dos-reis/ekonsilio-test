@@ -1,5 +1,5 @@
 import { useUserContext } from "@/contexts/user";
-import { authClient } from "@/utils/auth";
+import { authClient } from "@/utils/clients";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "react-toastify";
 

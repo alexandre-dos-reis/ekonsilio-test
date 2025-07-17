@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { authClient } from "@/utils/auth";
+import { authClient } from "@/utils/clients";
 import { toast } from "react-toastify";
 import { useUserContext } from "@/contexts/user";
 import { Button, Form, Input } from "@ek/ui";
