@@ -87,9 +87,7 @@ export const ChatConversation = ({
 
   // Always scroll to bottom
   useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   return (
@@ -104,15 +102,7 @@ export const ChatConversation = ({
           This conversation is closed, please open a new one.
         </Alert>
       )}
-      <div
-        className={cn(
-          "py-5 overflow-y-scroll ",
-          status === "init" || status === "inactive"
-            ? "max-h-[calc(100vh-17rem)]"
-            : "max-h-[calc(100vh-14rem)]",
-        )}
-        ref={messagesRef}
-      >
+      <div className={cn("py-5")} ref={messagesRef}>
         {messages.map((m, i) => (
           <ChatBubble
             key={m.id}
@@ -133,7 +123,6 @@ export const ChatConversation = ({
         ))}
       </div>
       <form
-        className="bg-base-100 h-[17rem]"
         onSubmit={(e) => {
           e.preventDefault();
           if (input && user) {

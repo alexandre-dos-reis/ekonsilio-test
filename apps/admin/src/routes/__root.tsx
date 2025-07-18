@@ -9,7 +9,7 @@ interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
-    <div className="h-screen overflow-y-hidden">
+    <div>
       <Navbar />
       <div className="max-w-xl mx-auto py-5 h-full relative">
         <Outlet />
