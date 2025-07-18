@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { conversations, eq, messages, users, or } from "@ek/db";
+import { conversations, eq, messages, users } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
@@ -27,8 +27,6 @@ export const geniusRoutes = new Hono<App>()
       .innerJoin(conversations, eq(conversations.id, messages.conversationId))
       .innerJoin(users, eq(users.id, conversations.createdById))
       .where(eq(conversations.managedById, genius.id));
-
-    console.log({ pastConversations });
 
     return c.json({ pastConversations });
   })
