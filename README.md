@@ -25,7 +25,8 @@ Les deux applications frontend sont accessibles aux URL suivantes :
 
 ### Base de données : `PostgreSQL`
 
-- Base de données relationnelle robuste
+- Language SQL.
+- Les données de l'application sont relationnelles.
 - Support des colonnes de type JSON, pratique pour les structures flexibles
 
 ### Backend
