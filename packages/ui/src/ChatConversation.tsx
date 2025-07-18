@@ -2,13 +2,14 @@ import type { User } from "@ek/auth";
 import { getData, sendData } from "@ek/shared";
 import { Alert, Button, ChatBubble, cn, Input } from ".";
 import { formatISO } from "date-fns";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 interface Props {
   websocketGetter: () => WebSocket;
   user: User;
   avatar: "anakeen" | "kenobee";
+  // revalidateMessages?: () => Promise<void>;
   conversation: {
     messages: {
       userId: string;
@@ -28,21 +29,22 @@ export const ChatConversation = ({
   user,
   websocketGetter,
   avatar,
+  // revalidateMessages,
 }: Props) => {
   const [status, setStatus] = useState<(typeof conversation)["status"]>(
     conversation?.status || "init",
   );
   const [onlineUsers, setOnlineUsers] = useState<Array<string>>();
-  const [messages, setMessages] = useState(conversation?.messages || []);
+  const [messages, setMessages] = useState(conversation?.messages);
   const [input, setInput] = useState("");
   const ws = useMemo(websocketGetter, []);
-  const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  const onMessage = useCallback((event: MessageEvent) => {
+  const onMessage = useCallback(async (event: MessageEvent) => {
     const message = getData(event.data);
 
     switch (message.event) {
       case "message":
+        // await revalidateMessages?.();
         setMessages((messages) => [
           ...messages,
           {
@@ -102,7 +104,7 @@ export const ChatConversation = ({
           This conversation is closed, please open a new one.
         </Alert>
       )}
-      <div className={cn("py-5")} ref={messagesRef}>
+      <div className={cn("py-5")}>
         {messages.map((m, i) => (
           <ChatBubble
             key={m.id}
@@ -123,7 +125,7 @@ export const ChatConversation = ({
         ))}
       </div>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           if (input && user) {
             const isoDate = formatISO(new Date());
@@ -155,6 +157,7 @@ export const ChatConversation = ({
             );
 
             setInput("");
+            // await revalidateMessages?.();
           }
         }}
       >

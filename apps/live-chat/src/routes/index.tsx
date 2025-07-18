@@ -84,6 +84,7 @@ function RouteComponent() {
                     to="/chat/$conversationId"
                     params={{ conversationId: c.conversationId }}
                     className="bg-base-300 flex justify-between items-center px-2 py-1"
+                    preload="intent"
                   >
                     <div>{c.content}</div>
                     <div className="text-xs text-neutral-500">

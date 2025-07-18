@@ -5,8 +5,13 @@ import { Link } from "@tanstack/react-router";
 interface Props {
   conversations: Conversations;
   showPulse?: boolean;
+  preload?: boolean;
 }
-export const ConversationList = ({ conversations, showPulse }: Props) => {
+export const ConversationList = ({
+  conversations,
+  showPulse,
+  preload,
+}: Props) => {
   return conversations.length === 0 ? (
     <div className="italic text-center text-sm text-neutral-500">
       None at the moment, please wait.
@@ -19,6 +24,7 @@ export const ConversationList = ({ conversations, showPulse }: Props) => {
           to="/chat/$conversationId"
           params={{ conversationId: c.conversationId }}
           className="list-row bg-base-300 relative"
+          preload={preload ? "intent" : false}
         >
           <div>
             <div>

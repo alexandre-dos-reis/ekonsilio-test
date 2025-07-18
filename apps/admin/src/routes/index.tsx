@@ -69,7 +69,7 @@ function RouteComponent() {
       </div>
       <div>
         <h2 className="text-center text-xl mb-3">Past Conversations</h2>
-        <ConversationList conversations={pastConversations} />
+        <ConversationList preload conversations={pastConversations} />
       </div>
     </div>
   );
