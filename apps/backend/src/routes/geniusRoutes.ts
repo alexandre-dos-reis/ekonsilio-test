@@ -66,7 +66,8 @@ export const geniusRoutes = new Hono<App>()
           .where(eq(conversations.id, convId))
           .returning(conversationCols)
       ).at(0)!;
-      convService.updateConversationStatus(convId, "active");
+
+      await convService.sendNewConversationsToGenius();
     }
 
     if (!conv.managedById) {

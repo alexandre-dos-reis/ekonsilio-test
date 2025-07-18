@@ -1,13 +1,12 @@
 import { db } from "../db";
 import { PubSubBroker, type WS } from "../utils/PubSubBroker";
 import type { User } from "@ek/auth";
-import { conversations, messages, users, eq, inArray } from "@ek/db";
-import type { StatusConv } from "@ek/db/types";
+import { conversations, messages, users, eq, inArray, and } from "@ek/db";
 import { getData, type SocketMessage } from "@ek/shared";
 import type { WSMessageReceive } from "hono/ws";
 
 export class ConversationService {
-  private broker = new PubSubBroker<SocketMessage, { status: string }>();
+  private broker = new PubSubBroker<SocketMessage>();
 
   private readonly GENIUS_WAITING_ROOM = "GENIUS_WAITING_ROOM";
 
@@ -21,16 +20,7 @@ export class ConversationService {
       .from(conversations)
       .where(eq(conversations.id, convId));
 
-    this.broker.subscribe(
-      convId,
-      ws,
-      user.id,
-      conv.status
-        ? {
-            status: conv.status,
-          }
-        : undefined,
-    );
+    this.broker.subscribe(convId, ws, user.id);
 
     this.broker.publish(
       convId,
@@ -106,16 +96,11 @@ export class ConversationService {
     this.broker.unsubscribe(this.GENIUS_WAITING_ROOM, geniusId);
   }
 
-  public async updateConversationStatus(convId: string, status: StatusConv) {
-    this.broker.setConversationState(convId, { status });
-    await this.sendNewConversationsToGenius();
-  }
-
   public async sendNewConversationsToGenius() {
-    const convsWithInitStatus = this.broker
+    const convIds = this.broker
       .getConversations()
-      .filter((c) => c.state.status === "init")
-      .map((c) => c.id);
+      .map((c) => c.id)
+      .filter((id) => id !== this.GENIUS_WAITING_ROOM);
 
     const subquery = db
       .selectDistinctOn([messages.conversationId])
@@ -127,7 +112,12 @@ export class ConversationService {
       .from(conversations)
       .innerJoin(users, eq(users.id, conversations.createdById))
       .innerJoin(subquery, eq(subquery.conversationId, conversations.id))
-      .where(inArray(conversations.id, convsWithInitStatus));
+      .where(
+        and(
+          inArray(conversations.id, convIds),
+          eq(conversations.status, "init"),
+        ),
+      );
 
     this.broker.publish(this.GENIUS_WAITING_ROOM, {
       event: "conversations-waiting-for-genius",
