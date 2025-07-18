@@ -9,7 +9,6 @@ interface Props {
   websocketGetter: () => WebSocket;
   user: User;
   avatar: "anakeen" | "kenobee";
-  // revalidateMessages?: () => Promise<void>;
   conversation: {
     messages: {
       userId: string;
@@ -29,7 +28,6 @@ export const ChatConversation = ({
   user,
   websocketGetter,
   avatar,
-  // revalidateMessages,
 }: Props) => {
   const [status, setStatus] = useState<(typeof conversation)["status"]>(
     conversation?.status || "init",
@@ -44,7 +42,6 @@ export const ChatConversation = ({
 
     switch (message.event) {
       case "message":
-        // await revalidateMessages?.();
         setMessages((messages) => [
           ...messages,
           {
@@ -157,7 +154,6 @@ export const ChatConversation = ({
             );
 
             setInput("");
-            // await revalidateMessages?.();
           }
         }}
       >

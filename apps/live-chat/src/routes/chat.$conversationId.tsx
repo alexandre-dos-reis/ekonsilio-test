@@ -1,6 +1,6 @@
 import { ChatConversation } from "@ek/ui";
 import { client, wsClient } from "@/utils/clients";
-import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useUserContext } from "@/contexts/user";
 
 export const Route = createFileRoute("/chat/$conversationId")({
@@ -24,16 +24,13 @@ function RouteComponent() {
   const conversation = Route.useLoaderData();
   const { conversationId } = Route.useParams();
   const { user } = useUserContext();
-  // const router = useRouter();
 
   const wsGetter = () =>
     wsClient.chat[":conversationId"].$ws({
       param: { conversationId },
     });
 
-  if (!conversation) {
-    return null;
-  }
+  if (!conversation) return null;
 
   return (
     <ChatConversation
@@ -41,9 +38,6 @@ function RouteComponent() {
       websocketGetter={wsGetter}
       user={user}
       avatar="anakeen"
-      // revalidateMessages={async () => {
-      //   await router.invalidate();
-      // }}
     />
   );
 }
