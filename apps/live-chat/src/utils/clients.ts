@@ -1,12 +1,10 @@
 import type { CustomerRoutes, ChatRoutes } from "@ek/backend";
 import { getAuthClient, createClient } from "@ek/clients";
 
-export const client = createClient<CustomerRoutes>(
-  import.meta.env.VITE_BACKEND_URL,
-).customers;
+const url = import.meta.env.VITE_BACKEND_URL;
 
-export const wsClient = createClient<ChatRoutes>(
-  import.meta.env.VITE_BACKEND_URL,
-);
+export const client = createClient<CustomerRoutes>(url).customers;
 
-export const authClient = getAuthClient(import.meta.env.VITE_BACKEND_URL);
+export const wsClient = createClient<ChatRoutes>(url);
+
+export const authClient = getAuthClient(url);
