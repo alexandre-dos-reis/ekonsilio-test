@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 interface Props {
   websocketGetter: () => WebSocket;
   user: User;
-  isCustomerSide?: boolean;
+  avatar: "anakeen" | "kenobee";
   conversation: {
     messages: {
       userId: string;
@@ -27,7 +27,7 @@ export const ChatConversation = ({
   conversation,
   user,
   websocketGetter,
-  isCustomerSide,
+  avatar,
 }: Props) => {
   const [status, setStatus] = useState<(typeof conversation)["status"]>(
     conversation?.status || "init",
@@ -122,7 +122,11 @@ export const ChatConversation = ({
             content={m.content}
             createdAt={m.createdAt}
             picture={
-              m.userId === user?.id && isCustomerSide ? "anakeen" : "kenobee"
+              m.userId === user?.id
+                ? avatar
+                : user?.role === "customer"
+                  ? "kenobee"
+                  : "anakeen"
             }
             isOnline={!!onlineUsers?.find((userId) => userId === m.userId)}
           />

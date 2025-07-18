@@ -1,9 +1,10 @@
 import { db } from "../db";
-import { conversations, eq, messages, users } from "@ek/db";
+import { conversations, eq, messages, users, or } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
 import { auth } from "../auth";
+import { convService } from "./chatRoutes";
 
 export const geniusRoutes = new Hono<App>()
   .basePath("/genius")
@@ -25,12 +26,15 @@ export const geniusRoutes = new Hono<App>()
       .from(messages)
       .innerJoin(conversations, eq(conversations.id, messages.conversationId))
       .innerJoin(users, eq(users.id, conversations.createdById))
-      .where(eq(messages.userId, genius.id));
+      .where(eq(conversations.managedById, genius.id));
+
+    console.log({ pastConversations });
 
     return c.json({ pastConversations });
   })
   .get("/conversations/:id", async (c) => {
     const convId = c.req.param("id");
+    const genius = c.get("user");
 
     let [[conv], msgs] = await Promise.all([
       db
@@ -55,8 +59,28 @@ export const geniusRoutes = new Hono<App>()
     }
 
     if (conv.status === "init") {
-      await db.update(conversations).set({ status: "active" });
-      conv.status = "active";
+      conv = (
+        await db
+          .update(conversations)
+          .set({
+            status: "active",
+          })
+          .where(eq(conversations.id, convId))
+          .returning(conversationCols)
+      ).at(0)!;
+      convService.updateConversationStatus(convId, "active");
+    }
+
+    if (!conv.managedById) {
+      conv = (
+        await db
+          .update(conversations)
+          .set({
+            managedById: genius.id,
+          })
+          .where(eq(conversations.id, convId))
+          .returning(conversationCols)
+      ).at(0)!;
     }
 
     return c.json({ ...conv, messages: msgs });

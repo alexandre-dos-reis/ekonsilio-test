@@ -7,7 +7,7 @@ import { ConversationService } from "../services/Conversation";
 
 const chatRoutes = new Hono<App>().basePath("/chat");
 
-const convService = new ConversationService();
+export const convService = new ConversationService();
 
 export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
   app: chatRoutes,
@@ -48,7 +48,7 @@ const routes = chatRoutes
       return {
         onOpen: async (_, ws) => {
           await convService.enterConversation(convId, ws, user);
-          convService.sendOnlineUsersIdForAConversation(convId);
+          convService.sendOnlineUsers(convId);
           await convService.sendNewConversationsToGenius();
         },
         onMessage: async (event, ws) => {
@@ -56,8 +56,7 @@ const routes = chatRoutes
         },
         onClose: async (_, ws) => {
           convService.leaveConversation(convId, ws, user);
-          convService.sendOnlineUsersIdForAConversation(convId);
-          await convService.sendNewConversationsToGenius();
+          convService.sendOnlineUsers(convId);
         },
       };
     }),

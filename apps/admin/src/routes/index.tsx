@@ -29,16 +29,15 @@ export type Conversations = Array<{
 }>;
 
 function RouteComponent() {
-  const [pastConversations] = useState<Conversations>(
-    Route.useLoaderData()
-      .pastConversations.map((c) => ({
-        content: c.messages.content,
-        createdAt: c.messages.createdAt,
-        conversationId: c.conversations.id,
-        userName: c.users.name,
-      }))
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-  );
+  const pastConversations = Route.useLoaderData()
+    .pastConversations.map((c) => ({
+      content: c.messages.content,
+      createdAt: c.messages.createdAt,
+      conversationId: c.conversations.id,
+      userName: c.users.name,
+    }))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
   const [liveConversations, setLiveConversations] = useState<Conversations>([]);
 
   const ws = useMemo(() => wsClient.chat.$ws(), []);

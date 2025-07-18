@@ -111,8 +111,14 @@ export const conversations = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
+    managedById: uuid("managed_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
   },
-  (table) => [index("conversations_created_by_id_index").on(table.createdById)],
+  (table) => [
+    index("conversations_created_by_id_index").on(table.createdById),
+    index("conversations_managed_by_id_index").on(table.managedById),
+  ],
 );
 
 export const messages = pgTable(

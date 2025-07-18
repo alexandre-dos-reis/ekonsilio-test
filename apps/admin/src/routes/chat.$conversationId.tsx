@@ -37,6 +37,7 @@ function RouteComponent() {
       user={user}
       conversation={conversation}
       websocketGetter={wsGetter}
+      avatar="kenobee"
     />
   );
 }

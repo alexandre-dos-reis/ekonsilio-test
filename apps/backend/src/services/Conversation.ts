@@ -1,7 +1,8 @@
 import { db } from "../db";
 import { PubSubBroker, type WS } from "../utils/PubSubBroker";
 import type { User } from "@ek/auth";
-import { conversations, messages, users, eq, inArray } from "@ek/db";
+import { conversations, messages, users, eq, inArray, and } from "@ek/db";
+import type { StatusConv } from "@ek/db/types";
 import { getData, type SocketMessage } from "@ek/shared";
 import type { WSMessageReceive } from "hono/ws";
 
@@ -20,21 +21,16 @@ export class ConversationService {
       .from(conversations)
       .where(eq(conversations.id, convId));
 
-    this.broker.subscribe(convId, ws, user.id, {
-      status: conv.status || "init",
-    });
-
-    if (user.role === "genius" && conv.status === "init") {
-      conv = (
-        await db
-          .update(conversations)
-          .set({ status: "active" })
-          .where(eq(conversations.id, convId))
-          .returning()
-      ).at(0)!;
-
-      this.broker.setConversationState(convId, { status: "active" });
-    }
+    this.broker.subscribe(
+      convId,
+      ws,
+      user.id,
+      conv.status
+        ? {
+            status: conv.status,
+          }
+        : undefined,
+    );
 
     this.broker.publish(
       convId,
@@ -49,7 +45,11 @@ export class ConversationService {
     );
   }
 
-  public leaveConversation(convId: string, ws: WS, user: NonNullable<User>) {
+  public async leaveConversation(
+    convId: string,
+    ws: WS,
+    user: NonNullable<User>,
+  ) {
     this.broker.publish(
       convId,
       {
@@ -59,6 +59,7 @@ export class ConversationService {
       ws,
     );
     this.broker.unsubscribe(convId, user.id);
+    await this.sendNewConversationsToGenius();
   }
 
   public async sendMessage(
@@ -83,7 +84,7 @@ export class ConversationService {
     }
   }
 
-  public sendOnlineUsersIdForAConversation(convId: string) {
+  public sendOnlineUsers(convId: string) {
     const conv = this.broker.getConversation(convId);
     if (!conv) {
       return;
@@ -103,6 +104,11 @@ export class ConversationService {
 
   public leaveGeniusWaitingRoom(geniusId: string) {
     this.broker.unsubscribe(this.GENIUS_WAITING_ROOM, geniusId);
+  }
+
+  public async updateConversationStatus(convId: string, status: StatusConv) {
+    this.broker.setConversationState(convId, { status });
+    await this.sendNewConversationsToGenius();
   }
 
   public async sendNewConversationsToGenius() {

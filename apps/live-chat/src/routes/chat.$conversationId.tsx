@@ -36,10 +36,10 @@ function RouteComponent() {
 
   return (
     <ChatConversation
-      isCustomerSide
       conversation={conversation}
       websocketGetter={wsGetter}
       user={user}
+      avatar="anakeen"
     />
   );
 }

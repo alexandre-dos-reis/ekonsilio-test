@@ -14,8 +14,8 @@ import type { App } from "..";
 import { auth } from "../auth";
 
 export const conversationCols = (() => {
-  const { id, status, createdAt } = getTableColumns(conversations);
-  return { id, status, createdAt };
+  const { id, status, createdAt, managedById } = getTableColumns(conversations);
+  return { id, status, createdAt, managedById };
 })();
 
 export const messageCols = (() => {
