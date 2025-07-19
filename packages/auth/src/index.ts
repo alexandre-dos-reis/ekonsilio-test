@@ -1,6 +1,7 @@
 import { accounts, sessions, users, verifications } from "@ek/db";
 import { authBasePath } from "@ek/shared";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 export const getAuth = (args: {
@@ -30,9 +31,20 @@ export const getAuth = (args: {
         create: {
           before: async (user, ctx) => {
             const origin = ctx?.request?.headers.get("origin");
+            let role: string | null = null;
 
-            const role =
-              origin === args.geniusTrustedOrigin ? "genius" : "customer";
+            switch (origin) {
+              case args.geniusTrustedOrigin:
+                role = "genius";
+                break;
+              case args.customerTrustedOrigin:
+                role = "customer";
+                break;
+              default:
+                throw new APIError("BAD_REQUEST", {
+                  message: `Unable to retrieve a role based on the current Origin header ! Origin: ${origin}`,
+                });
+            }
 
             return { data: { ...user, role } };
           },
