@@ -3,7 +3,6 @@ import { conversations, eq, messages, users } from "@ek/db";
 import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
-import { auth } from "../auth";
 import { convService } from "./chatRoutes";
 
 export const geniusRoutes = new Hono<App>()
