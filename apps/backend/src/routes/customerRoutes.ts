@@ -29,7 +29,6 @@ export const customerRoutes = new Hono<App>()
     const user = c.get("user");
 
     if (!user || user.role !== "customer") {
-      auth.api.signOut({ headers: c.req.raw.headers });
       return c.json(null, 403);
     }
 

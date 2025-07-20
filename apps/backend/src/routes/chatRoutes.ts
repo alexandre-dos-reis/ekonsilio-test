@@ -15,6 +15,15 @@ export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
 
 const routes = chatRoutes
   .use(authMiddleware)
+  .use(async (c, next) => {
+    const user = c.get("user");
+
+    if (!user) {
+      return c.json(null, 403);
+    }
+
+    return next();
+  })
   .get(
     "/",
     upgradeWebSocket(async (c) => {

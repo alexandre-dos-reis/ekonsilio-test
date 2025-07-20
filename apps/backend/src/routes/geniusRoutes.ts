@@ -12,7 +12,6 @@ export const geniusRoutes = new Hono<App>()
     const user = c.get("user");
 
     if (!user || user?.role !== "genius") {
-      auth.api.signOut({ headers: c.req.raw.headers });
       return c.json(null, 403);
     }
 
