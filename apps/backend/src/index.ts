@@ -6,7 +6,7 @@ import { cors } from "hono/cors";
 import { customerRoutes } from "./routes/customerRoutes";
 import { chatRoutes, injectWebSocket } from "./routes/chatRoutes";
 import { geniusRoutes } from "./routes/geniusRoutes";
-import { authMiddleware } from "./middleware/auth";
+import { authMiddleware } from "./middlewares/auth";
 import { authBasePath } from "@ek/shared";
 
 export type App = {

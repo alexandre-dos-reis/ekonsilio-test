@@ -11,6 +11,7 @@ import {
 import z from "zod";
 import { Hono } from "hono";
 import type { App } from "..";
+import { roleMiddleware } from "../middlewares/role";
 
 export const conversationCols = (() => {
   const { id, status, createdAt, managedById } = getTableColumns(conversations);
@@ -24,15 +25,7 @@ export const messageCols = (() => {
 
 export const customerRoutes = new Hono<App>()
   .basePath("/customers")
-  .use(async (c, next) => {
-    const user = c.get("user");
-
-    if (!user || user.role !== "customer") {
-      return c.json(null, 403);
-    }
-
-    return next();
-  })
+  .use(roleMiddleware("customer"))
   .get("/conversations", async (c) => {
     const customer = c.get("user");
 

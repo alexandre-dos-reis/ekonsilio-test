@@ -4,18 +4,11 @@ import { Hono } from "hono";
 import { conversationCols, messageCols } from "./customerRoutes";
 import type { App } from "..";
 import { convService } from "./chatRoutes";
+import { roleMiddleware } from "../middlewares/role";
 
 export const geniusRoutes = new Hono<App>()
   .basePath("/genius")
-  .use(async (c, next) => {
-    const user = c.get("user");
-
-    if (!user || user?.role !== "genius") {
-      return c.json(null, 403);
-    }
-
-    return next();
-  })
+  .use(roleMiddleware("genius"))
   .get("/conversations", async (c) => {
     const genius = c.get("user");
 
