@@ -13,8 +13,8 @@ Les deux applications frontend sont accessibles aux URL suivantes :
 - **Admin-Chat** : [http://localhost:4300](http://localhost:4300)
 
 > ⚠️ **Attention** : pour tester les deux applications simultanément, ouvrez-les dans **deux navigateurs différents**.  
-> Les cookies étant partagés entre ports sur un même domaine (`localhost`), cela peut entraîner un écrasement de session.  
-> Ce problème ne se produira pas en production, où chaque application disposera de son propre nom de domaine.
+> Les cookies étant partagés sur un même domaine (`localhost`), cela peut entraîner un écrasement de session.  
+> Ce problème ne se produirait pas en production, où chaque application disposerait de son propre nom de domaine.
 
 ## Choix techniques
 
@@ -29,6 +29,7 @@ Les deux applications frontend sont accessibles aux URL suivantes :
 - Les données de l'application sont relationnelles.
 - Ecosystème, nombreux plugins et extensions.
 - Support des colonnes de type JSON, pratique pour les structures flexibles.
+- Utilisation du type UUID pour les id car ils sont impossibles à deviner. Cela permet également de mélanger les données provenant de différentes tables sans risque de collision.
 
 ### Backend
 
@@ -40,5 +41,5 @@ Les deux applications frontend sont accessibles aux URL suivantes :
 ### Frontend
 
 - **Vite.js** : rapide, moderne — inutile de le présenter davantage !
-- **TanStack Router** : permet de gérer le routing, le chargement de données, etc. Très bonne compatibilité avec TypeScript.
+- **TanStack Router** : permet de gérer le routing, le chargement de données, cache, préchargement, etc. Expérience de dev vraiment excellente.
 - **Tailwind CSS** + **DaisyUI** : composants élégants, stylés uniquement via des classes HTML. Accélère fortement la mise en page.
